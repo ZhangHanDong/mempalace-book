@@ -50,6 +50,20 @@ O'Keefe and the Mosers were awarded the 2014 Nobel Prize in Physiology or Medici
 
 You do not need to build new memory infrastructure. You just need to place information into infrastructure that already exists.
 
+### Not a Myth: Three Levels of Evidence
+
+The Method of Loci is occasionally dismissed as "pop psychology" or a "memory trick," and sometimes even questioned as myth. This skepticism deserves a serious response, because MemPalace's entire design premise rests on the Method of Loci's effectiveness.
+
+The evidence can be examined at three levels:
+
+**Literary evidence**: Cicero's *De Oratore* (55 BC) and Quintilian's *Institutio Oratoria* (95 AD) independently document the same technique. This is not a single source — two rhetoricians from different eras describe identical operational methods, and medieval rhetorical textbooks continued the tradition unbroken for fifteen hundred years. The Simonides banquet story itself may have been embellished, but the Method of Loci as an operational technique is supported by a continuous teaching tradition spanning over a millennium.
+
+**Neuroscience evidence**: As discussed above, Dresler's 2017 *Neuron* study provides fMRI-level evidence — the Method of Loci activates brain regions that overlap with spatial navigation areas, and the effect is reproducible through training. O'Keefe and the Mosers' discovery of place cells and grid cells (2014 Nobel Prize) provides the anatomical foundation — the brain genuinely possesses dedicated spatial encoding hardware, and the Method of Loci conscripts precisely this hardware.
+
+**Competitive evidence**: The World Memory Championships, held annually since 1991, consistently sees top-ranked competitors using the Method of Loci or its variants. This is not a talent-selection effect — Dresler's research demonstrates that ordinary people can approach competitor-level performance after just six weeks of training. The Method of Loci is a teachable, learnable, verifiable cognitive technique.
+
+These three levels of evidence are independent and mutually reinforcing. The effectiveness of the Method of Loci does not depend on the historical accuracy of the Simonides story — even if that story were entirely fictional, the neuroscience and competitive data would still stand.
+
 ---
 
 ## Ben's Classical Education
