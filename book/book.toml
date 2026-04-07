@@ -1,0 +1,20 @@
+[book]
+authors = ["Zhang Alex"]
+language = "zh"
+multilingual = false
+src = "src"
+title = "MemPalace：AI 记忆的第一性原理"
+description = "当对话成为决策的载体，记忆系统该如何设计——基于 MemPalace v3.0.0 源码的设计分析"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+additional-js = ["mermaid.min.js", "mermaid-init.js", "language-switcher.js"]
+additional-css = ["language-switcher.css"]
+site-url = "/mempalace-book/"
+
+[output.html.search]
+enable = true

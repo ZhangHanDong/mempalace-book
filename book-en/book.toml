@@ -1,0 +1,20 @@
+[book]
+authors = ["Zhang Alex"]
+language = "en"
+multilingual = false
+src = "src"
+title = "MemPalace: First Principles of AI Memory"
+description = "How to design a memory system when conversations become the carrier of decisions — design analysis based on MemPalace v3.0.0 source code"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+additional-js = ["mermaid.min.js", "mermaid-init.js", "language-switcher.js"]
+additional-css = ["language-switcher.css"]
+site-url = "/mempalace-book/en/"
+
+[output.html.search]
+enable = true
