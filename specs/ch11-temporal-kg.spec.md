@@ -17,6 +17,7 @@ estimate: 0.5d
 - 必须引用源码：knowledge_graph.py
 - 包含 schema 表结构
 - 包含与 Zep Graphiti 的对比表（来自 README）
+- 如果讨论 `source_closet`，需要说明它在当前实现里是可选字段，不是默认自动填充链路
 
 ## Boundaries
 

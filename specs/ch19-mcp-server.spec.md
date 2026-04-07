@@ -8,6 +8,7 @@ estimate: 0.5d
 
 分析 19 个 MCP 工具的分组逻辑（读 7/写 2/KG 5/导航 3/日记 2）和设计决策。
 mempalace_status 为什么是最重要的工具——它同时教会 AI AAAK 语法和记忆协议。
+需要注明这个三重载荷在 palace collection 已存在时成立；未初始化时 `status` 先返回 `_no_palace()`。
 
 ## Decisions
 

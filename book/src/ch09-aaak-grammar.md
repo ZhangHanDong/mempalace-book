@@ -323,7 +323,7 @@ return {
 }
 ```
 
-这意味着：当 AI 第一次调用 `mempalace_status`（通常是会话开始时的第一个动作），它在响应中就收到了 AAAK 的完整语法规范。从这一刻起，它就知道如何读写 AAAK 了。
+这意味着：当 AI 第一次调用 `mempalace_status`，并且 palace collection 已经存在时，它在响应中就收到了 AAAK 的完整语法规范。从这一刻起，它就知道如何读写 AAAK 了。源码里的前置条件也要一并看到：如果 palace 尚未初始化，`status` 会先返回 `_no_palace()` 的错误与提示，而不是这段规范文本。
 
 这个设计的精彩之处在于：**规范本身也是自然语言文本**。模型不需要"学习"一种新的编码——它只需要阅读一段关于这种编码的说明，就像人类阅读一份格式说明书一样。AAAK 规范可以用 AAAK 的术语来自我描述，这是一个递归的自洽性。
 
@@ -402,7 +402,7 @@ LEO|onboarding|"first PR merged"|0.85|ORIGIN
 auth decision connects KAI and PRI
 ```
 
-这就是 AI 在每次会话开始时加载的内容——整个团队数月的关键历史，浓缩在不到 120 个 token 中。
+这更准确地说是 AAAK 工具链里**可以生成**的一种 Layer 1 产物——把整个团队数月的关键历史浓缩到不到 120 个 token 中。需要和当前默认运行时区分的是：公开仓库里的 `mempalace wake-up` 目前走的仍然是 `layers.py` 的 L0 + L1 文本路径，典型输出约 600-900 token，而不是直接加载这里的 `generate_layer1()` 结果。
 
 ---
 

@@ -8,6 +8,8 @@ estimate: 0.5d
 
 论证 local-first 不是省钱手段，而是架构约束。隐私是最私密的数据——记忆。
 连接 Ben Sigman 的去中心化背景（Bitcoin Libre）。MIT 开源的意义。
+需要区分"冷启动准备环境"与"之后的长期离线运行"，不要把首次依赖/模型准备写成从零开始也完全不需要网络。
+不要把"核心 raw 路径本地优先"写成"整个仓库完全没有网络代码"；benchmark rerank、Wikipedia lookup 这类可选联网路径要明确放在外围能力。
 
 ## Decisions
 

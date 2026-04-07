@@ -164,7 +164,7 @@ DIALOGUE_PATTERNS = [
 
 ## 实体注册表：持久化和消歧
 
-检测到的实体需要持久化存储，而且需要处理一些棘手的消歧问题。这是 `entity_registry.py` 的工作。
+这里需要先把两条链路分开。**当前 `mempalace init` 的主流程**是：`entity_detector.py` 检测候选实体，`confirm_entities()` 做交互确认，然后把结果写到项目目录下的 `entities.json`，供后续 AAAK / `Dialect.from_config` 这类实体映射配置路径使用。**`entity_registry.py` 则是相邻但更长期的组件**：它服务于 onboarding、名称消歧、研究缓存和持续学习，默认落盘位置是 `~/.mempalace/entity_registry.json`。
 
 `EntityRegistry` 类（`entity_registry.py:268`）维护一个 JSON 文件（默认位于 `~/.mempalace/entity_registry.json`），存储三类信息：
 
@@ -187,7 +187,7 @@ DIALOGUE_PATTERNS = [
 }
 ```
 
-实体的来源（`source`）有三个优先级：
+在 `EntityRegistry` 这条链路内部，实体的来源（`source`）有三个优先级：
 
 1. **onboarding**：用户在初始化时明确告诉系统的。置信度 1.0，不可挑战。
 2. **learned**：系统从会话历史中推断出来的。置信度取决于检测算法的输出。
@@ -237,7 +237,7 @@ CONCEPT_CONTEXT_PATTERNS = [
 
 ### Wikipedia 查询
 
-对于既不在注册表中、也不在停用词列表中的陌生大写词，注册表提供了 Wikipedia 查询功能（`entity_registry.py:179`）。
+对于既不在注册表中、也不在停用词列表中的陌生大写词，`EntityRegistry` 模块提供了 Wikipedia 查询功能（`entity_registry.py:179`）。
 
 查询使用 Wikipedia 的 REST API（免费，无需 API key），根据返回的摘要内容判断词的类型：
 
@@ -245,13 +245,13 @@ CONCEPT_CONTEXT_PATTERNS = [
 - 如果摘要包含 "city in"、"municipality"、"capital of" 等短语，判定为地名
 - 如果在 Wikipedia 上找不到（404），反而判定为人名（`entity_registry.py:249-256`）——一个不在 Wikipedia 上的大写词，很可能是某个具体的人的名字或昵称
 
-查询结果会被缓存在 `wiki_cache` 中，避免重复请求。
+查询结果会被缓存在 `wiki_cache` 中，避免重复请求。需要补一句实现边界：我在当前 CLI `init` / mining 主链路里没有看到默认调用这条 Wikipedia 研究路径；它更像是注册表模块预留出来的辅助能力，而不是今天每次初始化都会自动触发的步骤。
 
 ### 从会话中持续学习
 
-注册表的 `learn_from_text()` 方法（`entity_registry.py:553`）使人物检测不仅限于初始化阶段。每次处理新的会话文本时，系统可以调用这个方法，对文本运行候选提取和信号评分。如果发现新的高置信度人物候选（默认阈值 0.75），就自动加入注册表。
+注册表的 `learn_from_text()` 方法（`entity_registry.py:553`）说明这套设计并不想停在一次性初始化。理论上，每次处理新的会话文本时，系统都可以调用这个方法，对文本运行候选提取和信号评分；如果发现新的高置信度人物候选（默认阈值 0.75），就自动加入注册表。
 
-这形成了一个渐进式学习的循环：初始的 onboarding 提供了种子数据，之后每次会话都可能补充新发现的实体。但门槛有意设得较高（0.75），因为自动添加的成本不仅是一个错误的条目——它会影响后续所有查询的结果。宁可漏掉一些，也不要误判。
+这形成了一个清晰的渐进式学习方向：初始的 onboarding 提供种子数据，之后的文本可以持续补充新发现的实体。但需要实话实说，当前公开仓库里我没有看到 `learn_from_text()` 被默认接进 `mempalace init`、`mine` 或会话摄入主循环；它现在更像是已经实现但尚未成为默认工作流的一步。门槛有意设得较高（0.75），因为自动添加的成本不仅是一个错误的条目——它会影响后续所有查询的结果。宁可漏掉一些，也不要误判。
 
 ---
 

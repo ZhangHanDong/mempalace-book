@@ -15,6 +15,7 @@ estimate: 0.5d
 - 深度：3 层（规则设计 → 评分算法 → 与 ML 的比较）
 - 必须引用源码：entity_detector.py, entity_registry.py
 - 包含人物/项目检测的模式表
+- 必须区分当前 CLI `init` 主流程写入的 `entities.json`（主要服务 AAAK / Dialect 配置路径），与 `entity_registry.py` 提供的 onboarding / 消歧 / wiki / learn-from-text 辅助链路
 
 ## Boundaries
 

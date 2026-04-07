@@ -1,6 +1,6 @@
 # Chapter 20: Specialist Agent System
 
-> **Positioning**: This chapter analyzes how MemPalace uses the palace's spatial structure -- rather than configuration file bloat -- to host an unlimited number of specialist agents, and why each agent's memory is an AAAK diary rather than a separate database.
+> **Positioning**: This chapter analyzes how MemPalace uses the palace's spatial structure -- rather than configuration-file bloat -- to host an unlimited number of specialist agents, and why it models each agent's memory as `wing + diary`. AAAK diary format is encouraged in the README and tool descriptions; the part the current MCP runtime actually implements is the storage structure of one wing and one diary room per agent.
 
 ---
 
@@ -46,7 +46,7 @@ col.add(
 )
 ```
 
-Each diary entry carries complete spatial coordinates -- wing (which agent), room (diary), hall (hall_diary), topic (topic tag) -- plus temporal coordinates (`filed_at`, `date`) and identity markers (`agent`). This metadata enables diary entries to be processed by all of the palace's existing infrastructure: `search` can search them, `traverse` can follow tunnels from one agent's diary to another agent's related memories, `list_rooms` can display each agent's diary size.
+Each diary entry carries complete spatial coordinates -- wing (which agent), room (diary), hall (hall_diary), topic (topic tag) -- plus temporal coordinates (`filed_at`, `date`) and identity markers (`agent`). That is enough to let diary entries flow into the palace's existing infrastructure: `search` can find them, `list_rooms` can count them, and graph-building logic will still see `diary` as an ordinary room. More cautiously stated, the current code does not provide a diary-specific topic filter or a higher-level agent-orchestration layer; at runtime these are still ordinary drawers with agent-flavored metadata.
 
 Agents aren't add-ons external to the palace. Agents are residents of the palace.
 
@@ -54,7 +54,7 @@ Agents aren't add-ons external to the palace. Agents are residents of the palace
 
 ## AAAK Diary: Compressed Self-Awareness
 
-The format agents use to write diary entries is AAAK -- this isn't an accidental default but a core system design choice. Look at the `diary_write` tool's description (`mcp_server.py:649`):
+When agents write diary entries, the **interface contract** encourages AAAK. Look at the `diary_write` tool's description (`mcp_server.py:649`):
 
 ```
 Write to your personal agent diary in AAAK format. Your observations,
@@ -71,11 +71,11 @@ PR#42|auth.bypass.found|missing.middleware.check|pattern:3rd.time.this.quarter|�
 
 This single line compresses the following information: during PR #42 review, an authentication bypass vulnerability was found, caused by a missing middleware check, this is the third occurrence of the same pattern this quarter, importance four stars. In natural language, this would take at least three lines. In AAAK, one line does the job.
 
-The value of compression is realized in `diary_read`. When an agent reads its own history in a new session (`mcp_server.py:395-436`), it loads the most recent 10 diary entries. If each entry is three lines of natural language, 10 entries would be 30 lines, roughly 300-400 tokens. If each entry is one line of AAAK, 10 entries are 10 lines, roughly 50-80 tokens.
+The tool description directly demonstrates the AAAK diary format. But this is exactly where "interface contract" and "runtime enforcement" must be separated. `tool_diary_write` does not validate that the input is AAAK, nor does it automatically compress natural language into AAAK; it simply stores whatever string the caller passes in. So the token-efficiency benefit is real, but only if the caller chooses to follow the AAAK convention.
 
-For a code review agent, 50 tokens is enough to load complete summaries of its last 10 reviews -- what issues were found, in which PRs, how many occurrences, how important. 300 tokens could accomplish the same thing, but at the cost of occupying context window space. In a workflow that already needs to load code diffs, test outputs, and team standards, a 250-token difference means being able to review one or two more files.
+That means the more accurate claim is: if a code review agent consistently writes its observations in AAAK, then reading the latest 10 diary entries can indeed restore recent work patterns with a very small token budget. If it writes plain English, `diary_read` still works -- it just costs more context.
 
-AAAK diary's pipe-delimited syntax shows particular advantage here. `pattern:3rd.time.this.quarter` records not just a fact but a trend. When the agent next reviews an authentication-related PR, it reads its diary, sees this pattern marker, and knows to pay special attention to middleware checks -- because history tells it this is a recurring problem. A diary isn't a log; a diary is a compressed encoding of a learning curve.
+AAAK diary's pipe-delimited syntax is still especially useful here. `pattern:3rd.time.this.quarter` records not just a fact but a trend. When the agent later reviews another authentication-related PR, reading these diary entries can bring that pattern back into the current session. A diary is not a log; it is a compressed encoding of a learning curve. In the current implementation, though, that compression happens because the caller voluntarily writes AAAK, not because the MCP server enforces or performs it.
 
 ---
 
@@ -89,7 +89,7 @@ You have MemPalace agents. Run mempalace_list_agents to see them.
 
 One line. Not "you have an agent called reviewer, it focuses on code quality, its system prompt is..." Instead, it tells the AI: you have agents, go look in the palace to see which ones.
 
-The underlying mechanism of this design is runtime discovery. Agent definition files are stored in the `~/.mempalace/agents/` directory:
+The README then sketches a fuller runtime-discovery mechanism, with agent definition files stored in the `~/.mempalace/agents/` directory:
 
 ```
 ~/.mempalace/agents/
@@ -98,9 +98,9 @@ The underlying mechanism of this design is runtime discovery. Agent definition f
   └── ops.json            # deployment, incident response, infrastructure
 ```
 
-Each JSON file defines the agent's focus areas and behavioral patterns. But the key point is: these files don't need to be referenced in any central configuration. The AI discovers them at runtime through the palace's wing list -- `list_wings` returns all wings, and those named with `wing_` plus the agent name are the agent wings. Diary content is loaded via `diary_read`.
+That tells a clear product-direction story: agent descriptors live in a local directory, top-level configuration stays one line long, and runtime discovery fills in the rest. **But if you compare this strictly against the current `mcp_server.py`, one important truth has to be added: the repository does not implement `mempalace_list_agents`, nor does it load `~/.mempalace/agents/*.json`.** What is really shipped today is the minimum storage structure provided by `diary_write` / `diary_read`; the README's agent directory and discovery flow are better read as a proposed higher-level workflow.
 
-Adding the 51st agent means: create a JSON file, then let the agent start writing diary entries. No global configuration needs to be modified, no services need to be restarted, no prompt templates need to be updated. The palace's space is infinite -- adding one more wing has the same impact on the system as adding one more room: zero configuration bloat.
+So "adding the 51st agent" needs to be split into two layers. At the current MCP layer, it simply means calling `diary_write` with a new `agent_name`; the system will naturally start writing into `wing_<agent>/diary` with no schema migration, no extra instance, and no central registry. In the fuller README experience, it would additionally involve an agent JSON file and a runtime discovery step.
 
 Compare this to Letta's model: each agent has independent core memory (always-loaded key facts), recall memory (searchable history), and archival memory (long-term storage). All of these are managed via REST API and stored in the cloud. Adding an agent means creating an agent instance, configuring its memory blocks, setting up its system prompt, and managing its API keys. 50 agents means doing this 50 times, plus ongoing monthly fees.
 
@@ -114,13 +114,11 @@ An unexpected advantage of the palace architecture is knowledge connections betw
 
 When the reviewer agent records `auth.bypass.found|missing.middleware.check` in `wing_reviewer/diary`, and the architect agent records `auth.migration.decision|clerk>auth0|middleware.layer.critical` in `wing_architect/diary` -- each writes in its own wing, without interference. But `mempalace_search("middleware")` returns both records. `mempalace_find_tunnels("wing_reviewer", "wing_architect")` discovers they share a "diary" room (albeit with different content).
 
-An even more interesting case is when agents use the same topic tags. If the reviewer's diary topic is "auth" and the architect's diary topic is also "auth," then a filtered search on `hall_diary` with `topic=auth` hits both agents' memories. Two independent experts' independent observations on the same topic are automatically linked by the palace's structure.
-
-This linkage requires no inter-agent communication protocol. No message queues, no shared memory, no publish-subscribe. Agents each write their own diaries, and the palace's search and navigation infrastructure automatically connects related memories. This is emergent collaboration -- not designed, but naturally growing from the spatial structure.
+The current implementation boundary matters here too. `searcher.py` supports only `wing` and `room` filters; it does not support diary-specific filtering like `topic=auth`, and `traverse` aggregates by room name rather than topic. So MemPalace already provides "multiple agents can keep memory inside the same palace and be searched together" at one level, but it does not yet provide a finer-grained agent-topic orchestration layer.
 
 ---
 
-## Diary Reading: Chronological Self-Review
+## Diary Reading: Recent Self-Review
 
 The implementation of `tool_diary_read` (`mcp_server.py:395-436`) reveals the diary system's final design detail:
 
@@ -137,7 +135,7 @@ def tool_diary_read(agent_name, last_n=10):
 
 It uses `$and` conditions to precisely locate the agent's diary -- wing matches the agent name, room is fixed as "diary." Then it sorts by timestamp in descending order and returns the most recent N entries.
 
-The default value `last_n=10` is a considered choice. Too few (say 3), and the agent loses trend awareness -- it can't see "this problem keeps recurring." Too many (say 50), and the diary's token overhead exceeds its value -- 50 AAAK diary entries are roughly 400 tokens, already approaching the L1 layer's budget. 10 strikes a balance between trend recognition and token economy.
+The default value `last_n=10` is a considered choice. Too few (say 3), and the agent loses trend awareness -- it can't see "this problem keeps recurring." Too many (say 50), and a recent self-review starts to consume unnecessary context budget. There is no need to pretend the code contains an exact token manager here; what the source really does is simpler: return the latest N entries and let the caller decide how to consume them.
 
 The `total` field in the return structure tells the agent how long its complete diary is:
 
@@ -160,7 +158,7 @@ Stacking up the three layers of what an agent means:
 
 **First layer: storage.** An agent is a wing. A wing is a metadata tag in ChromaDB, not a separate database. Adding an agent means adding a tag value -- the system's complexity doesn't increase. This is linear scaling from 0 to N agents -- but the cost function's slope is zero (not counting storage itself).
 
-**Second layer: cognition.** An agent's memory is an AAAK diary. The diary records not just facts but patterns (`pattern:3rd.time`), importance assessments (star ratings), and emotion markers (`*fierce*`, `*raw*`). When an agent reads its diary in a new session, it isn't recalling what happened -- it's reconstructing its understanding of the domain. A reviewer agent that has reviewed 200 PRs, after reading its 10 most recent diary entries, has sharper code quality perception than a fresh AI with no history.
+**Second layer: cognition.** If the caller follows the tool description and writes diary entries in AAAK, then the diary records not just facts but patterns (`pattern:3rd.time`), importance assessments (star ratings), and emotion markers (`*fierce*`, `*raw*`). When an agent reads those entries in a new session, it is not merely recalling what happened -- it is rebuilding its understanding of the domain. A reviewer agent that has reviewed 200 PRs, after reading 10 recent compressed diary entries, has sharper code quality perception than a fresh AI with no history.
 
 **Third layer: ecosystem.** Multiple agents accumulate domain expertise in the same palace, and their memories are connected through the palace's search and navigation infrastructure. Bug patterns found by the reviewer may relate to the architect's design decisions; incidents recorded by ops may corroborate the reviewer's code quality concerns. These connections don't need to be manually established -- they emerge naturally through shared semantic space and namespace.
 

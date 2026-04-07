@@ -6,9 +6,10 @@ estimate: 0.5d
 
 ## Intent
 
-分析四层记忆栈的设计：L0 身份（~50 token）、L1 关键事实（~120 token AAAK）、
-L2 房间回忆（按需）、L3 深度搜索（按需）。每层的 token 预算如何确定。
+分析四层记忆栈的设计：L0 身份（当前实现 ~100 token）、L1 关键故事（当前实现 ~500-800 token），
+L2 房间回忆（按需）、L3 深度搜索（按需）。每层的 token 预算如何确定，以及 README 中更轻的 AAAK 目标口径与当前实现有何差异。
 为什么是 4 层而不是 2 层或 8 层。
+需要明确：当前 L2 已实现为显式 `recall()/retrieve()` 过滤接口，而不是已经接入默认对话流程的自动话题触发层；它返回的是一批过滤命中的 drawer，不保证按时间排序。
 
 ## Decisions
 
@@ -42,8 +43,9 @@ Scenario: 预算推导过程
   Test: manual_review_budget
   Given 第 14 章内容
   When 检查 token 预算
-  Then L0 (~50 token) 和 L1 (~120 token) 有具体内容示例
-  And 总唤醒成本 (~170 token) 的经济含义有说明
+  Then L0 (~100 token) 和 L1 (~500-800 token) 有具体内容示例
+  And 总唤醒成本 (~600-900 token) 的经济含义有说明
+  And 区分了当前实现与 README 中更轻的 AAAK 目标口径
 
 Scenario: 源码引用
   Test: manual_review_source

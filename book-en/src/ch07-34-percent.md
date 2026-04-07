@@ -165,7 +165,7 @@ The final step from 99.4% to 100% involved analyzing three questions where two i
 
 This chapter's core argument can be captured in a single sentence: **in AI memory systems, how data is organized matters more than the choice of retrieval algorithm.**
 
-The 34% improvement does not require a better embedding model --- all-MiniLM-L6-v2 is a model released in 2020 with a relatively small parameter count, far from the current state of the art in embedding technology. It does not require LLM involvement --- no API calls were made in the entire improvement process. It does not require complex post-processing --- no reranking, no query expansion, no pseudo-relevance feedback.
+The 34% improvement does not require a better embedding model --- all-MiniLM-L6-v2 is a model released in 2020 with a relatively small parameter count, far from the current state of the art in embedding technology. It does not require LLM involvement in this benchmark path --- no API calls were made in the structural-improvement experiment itself. It does not require complex post-processing --- no reranking, no query expansion, no pseudo-relevance feedback.
 
 It requires only three things:
 
@@ -189,6 +189,6 @@ This chapter and the preceding three collectively complete the "memory palace" p
 
 But the memory palace is only one of MemPalace's three core designs. Structure solves the "how to find information" problem, but there is another equally critical question left unanswered: once you find the information, how do you convey it to the AI within an extremely small token budget?
 
-A Wing may contain thousands of memories. Even if structural filtering narrows the candidate set to a few dozen, stuffing all of those complete texts into the AI's context window is still expensive (potentially requiring thousands or even tens of thousands of tokens). You need a compression method --- not summarization (summarization loses information) but a lossless, AI-directly-readable compression encoding.
+A Wing may contain thousands of memories. Even if structural filtering narrows the candidate set to a few dozen, stuffing all of those complete texts into the AI's context window is still expensive (potentially requiring thousands or even tens of thousands of tokens). You need a compression method --- not summary extraction that discards important detail, but an AI-readable compact representation whose ideal goal is to preserve factual structure.
 
 This is the problem the AAAK dialect was created to solve. Part 3 will analyze in depth how this 30x compression, zero-information-loss, AI-specific language was designed.

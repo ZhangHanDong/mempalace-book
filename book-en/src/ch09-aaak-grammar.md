@@ -18,7 +18,7 @@ Current sprint: auth migration to Clerk. Kai recommended Clerk
 over Auth0 based on pricing and DX.
 ```
 
-**AAAK compressed (~120 tokens):**
+**AAAK compressed (structured shorthand example):**
 
 ```
 TEAM: PRI(lead) | KAI(backend,3yr) SOR(frontend) MAY(infra) LEO(junior,new)
@@ -46,7 +46,7 @@ More critical is the completeness of information. Let us verify item by item:
 | Reasons are pricing and developer experience | `(pricing+dx)` |
 | This is an important decision | `****` |
 
-Thirteen factual assertions, all preserved. Zero loss. And the token count dropped from approximately 70 in the original to approximately 35 after compression -- this brief example actually achieves about a 2x compression ratio. But when applied to longer texts (thousands of tokens of complete conversation logs), the abundant narrative redundancy, transition sentences, and repeated references in natural language are eliminated en masse, making the 30x compression ratio achievable.
+In this short structured example, thirteen factual assertions are preserved. The token count drops from roughly 70 in the original to roughly 35 after compression -- about a 2x ratio here. But that example should not be overgeneralized. In the current repository, `dialect.compress()` is a heuristic plain-text compressor: it selects key sentences, extracts top topics, and truncates entities / emotions / flags. For long, redundant conversation logs, structured shorthand plus content selection can drive the ratio much higher, which is where the README's 30x figure comes from.
 
 ---
 
@@ -323,7 +323,7 @@ return {
 }
 ```
 
-This means that when the AI first calls `mempalace_status` (typically the first action at session start), it receives the complete AAAK grammar specification in the response. From that moment on, it knows how to read and write AAAK.
+This means that when the AI explicitly calls `mempalace_status`, and a palace collection already exists, it receives the complete AAAK grammar specification in the response. From that point on, it knows how to read and write AAAK. The precondition matters: if the palace has not been initialized yet, `status` returns `_no_palace()` guidance instead of the AAAK spec payload.
 
 The brilliance of this design lies in the fact that **the specification itself is also natural language text**. The model does not need to "learn" a new encoding -- it simply reads a description about this encoding, just as a human reads a format specification document. The AAAK specification can describe itself using AAAK's own terminology, a recursive self-consistency.
 
@@ -402,7 +402,7 @@ LEO|onboarding|"first PR merged"|0.85|ORIGIN
 auth decision connects KAI and PRI
 ```
 
-This is what the AI loads at the start of every session -- the entire team's months of critical history, condensed into fewer than 120 tokens.
+More accurately, this is one kind of Layer 1 artifact that the AAAK toolchain **can generate** -- a way to condense months of critical history into fewer than 120 tokens. What must be kept separate from that is the current default runtime path: the public repository's `mempalace wake-up` still goes through `layers.py` and typically outputs roughly 600-900 tokens of L0 + L1 text rather than directly loading `generate_layer1()` output.
 
 ---
 

@@ -10,6 +10,7 @@ depends: [ch05-wing-hall-room]
 分析 Tunnel 跨 wing 连接机制——同一 Room 出现在不同 Wing 中自动形成 Tunnel。
 BFS 图遍历如何实现跨领域关联。核心技术亮点：图从 ChromaDB 元数据零成本构建，
 没有额外数据库。
+需要区分当前产品运行时的最小事实：跨 wing 连接主要由 `room` 元数据驱动；`hall` 在 `palace_graph.py` 中是可选增强信息，不是默认所有写入路径都稳定具备的字段。
 
 ## Decisions
 

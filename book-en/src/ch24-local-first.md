@@ -58,7 +58,7 @@ Translate this reasoning chain to the memory system domain: when you put AI memo
 
 For someone who spent years in the decentralized lending market, this reasoning is natural, almost automatic. Local-first isn't a technical preference, isn't an engineering trade-off about latency or bandwidth -- it's a philosophical stance about trust architecture. Your money shouldn't depend on trusting intermediaries. Your memory even less so.
 
-This is why MemPalace's local-first isn't a feature ("we also support local deployment!") but an architectural constraint ("data will never leave your machine"). Features can be turned off; architectural constraints cannot.
+This is why MemPalace's local-first isn't a feature ("we also support local deployment!") but an architectural constraint: the core raw path is designed so day-to-day memory storage and retrieval do not require your data to leave your machine. Features can be turned off; architectural constraints cannot.
 
 ---
 
@@ -90,7 +90,7 @@ Consider a hypothetical: MemPalace is local-first, but it's closed-source. Your 
 
 Is such a system local-first? From a data storage perspective, yes. From a trust perspective, no -- because you still need to trust a codebase you can't audit.
 
-The MIT license solves this problem. Anyone can read every line of MemPalace's code, verify that it indeed makes no network calls (unless the user explicitly enables Haiku reranking), and confirm that data truly exists only locally. Code auditability means the "local-first" promise is verifiable, not merely a claim requiring trust.
+The MIT license solves this problem. Anyone can read every line of MemPalace's code and audit the actual data path. The stricter version of that claim should be: the core raw storage / search / wake-up loop is local-first, while optional networked capabilities such as benchmark rerank and Wikipedia lookup can be identified and evaluated separately. Code auditability means the "local-first" promise is verifiable, not merely a claim requiring trust.
 
 The MIT license also solves another more long-term problem: survivability.
 
@@ -114,7 +114,7 @@ chromadb>=0.4.0
 pyyaml>=6.0
 ```
 
-No API key. No cloud services. After installation, no internet connection is needed.
+No required API key for the raw path. No required cloud service for day-to-day use. After local dependencies and default embedding assets are prepared, routine raw operation no longer needs internet access.
 
 This extreme zero-dependency constraint isn't accidental. Every external dependency is a potential trust point and failure point. Requiring an API key means your data (at least query content) leaves your machine. Requiring cloud services means your system availability depends on someone else's servers. Requiring an internet connection means your memory system is unavailable on planes, in network-restricted environments, or during offline development.
 
@@ -134,7 +134,7 @@ Haiku reranking is an interesting design point. It's the only optional network f
 
 Let's use three concrete scenarios to illustrate what local-first means in practice.
 
-**Scenario one: security audit.** A fintech company's security team needs to audit all systems that process customer data. For a SaaS memory product, auditing means reviewing the third party's security certifications, data processing agreements, sub-processor lists, and data residency policies. For MemPalace, auditing means: read the source code, confirm no network calls, done. An afternoon of code review replaces weeks of compliance documentation review.
+**Scenario one: security audit.** A fintech company's security team needs to audit all systems that process customer data. For a SaaS memory product, auditing means reviewing the third party's security certifications, data processing agreements, sub-processor lists, and data residency policies. For MemPalace, the audit focus shifts to: read the source code, confirm that day-to-day raw storage / search / wake-up stay local, and separately identify optional networked paths such as benchmark rerank or Wikipedia lookup. An afternoon of code review can often clarify the core data path.
 
 **Scenario two: company shutdown.** A team using a certain AI memory SaaS product receives notice: the service will shut down in 60 days. The team needs to export all data within 60 days, find an alternative, migrate, and verify data integrity. This is a high-pressure, time-limited engineering task, and it usually happens at the most inconvenient time. A team using MemPalace never faces this scenario. Data is local, code is on GitHub (or your fork). Nothing needs to be "migrated."
 
@@ -152,7 +152,7 @@ This chapter's argument is: **for the specific data type of AI memory, local-fir
 
 The reason traces back to this chapter's opening argument: AI memory data is one of the most private data types. It contains not your identity or financial information -- it contains your thought processes. For such data, "data in your hands" isn't an optional security hardening measure but should be the default architectural posture.
 
-MemPalace implements this posture with a concise tech stack: Python + ChromaDB + SQLite + AAAK. No servers, no APIs, no subscriptions, no code you can't audit. Your memory is on your machine, the code processing your memory is in your GitHub fork, and the AAAK dialect compressing your memory is a public specification.
+MemPalace implements this posture with a concise tech stack: Python + ChromaDB + SQLite + AAAK. No mandatory servers, no mandatory API path, no subscriptions, and no code you can't audit. Your memory is on your machine, the code processing your memory is in your GitHub fork, and the AAAK dialect compressing your memory is a public specification.
 
 This isn't a technical limitation. It's a design decision. A design decision that grew naturally from the values of the decentralized lending market.
 
@@ -170,7 +170,7 @@ For most types of data -- code (GitHub), documents (Google Docs), communications
 
 But AI memory is a different data type. Its sensitivity is extremely high (your thought processes), its migration cost is extremely large (a memory system is not just data but also organizational structure and retrieval logic), and its dependency is extremely deep (your AI assistant's effectiveness directly depends on memory availability). For such data, the cost of surrendering control may exceed all the convenience that cloud services bring.
 
-MemPalace's local-first architecture, combined with the MIT open-source license and the zero external dependency tech stack, together constitute a complete control guarantee system:
+MemPalace's local-first architecture, combined with the MIT open-source license and a minimal-dependency stack, together constitute a strong control guarantee system:
 
 - Data is on your machine (physical control).
 - Code is open-source (audit rights).

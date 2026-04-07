@@ -60,3 +60,4 @@
 - [Appendix A: E2E Trace — From mempalace init to First Search](appendix-e2e-init.md)
 - [Appendix B: E2E Trace — MCP Tool Call Lifecycle](appendix-e2e-mcp.md)
 - [Appendix C: AAAK Dialect Complete Reference](appendix-aaak-spec.md)
+- [Appendix D: Authenticity and Credibility Assessment](appendix-credibility-assessment.md)

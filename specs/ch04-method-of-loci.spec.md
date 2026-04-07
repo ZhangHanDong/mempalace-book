@@ -26,6 +26,7 @@ estimate: 0.5d
 ### Forbidden
 - 不要编造认知科学引用
 - 不要过度简化 Method of Loci 为"记忆技巧"
+- 不要把 Hall/自动 Wing 路由写成当前开源运行时已经具备的默认检索步骤
 
 ## Out of Scope
 
@@ -54,3 +55,4 @@ Scenario: 连接到 AI 设计
   When 评估从古典到 AI 的过渡
   Then 理解"空间结构 → 检索效率"的逻辑
   And 准备好理解 MemPalace 的 Wing/Room 设计
+  And 不会误以为当前 searcher.py 已实现自动 Wing 判定或 Hall 级过滤

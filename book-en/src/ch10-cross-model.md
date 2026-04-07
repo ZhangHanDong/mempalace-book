@@ -78,7 +78,7 @@ AAAK's grammar design strictly limits itself to the domain of recoverable ellips
 
 And unrecoverable information -- such as Kai and Priya having worked together for three years -- is not omitted; it is preserved in the form of `3yr`.
 
-This principle of "only performing recoverable ellipsis" forms a perfect correspondence with Chapter 8's Constraint 2 (zero information loss). Zero information loss, precisely stated in linguistic terms, means: all omissions must be recoverable.
+This principle of "only performing recoverable ellipsis" corresponds directly to Chapter 8's Constraint 2: factual completeness as a design ideal. Stated in linguistic terms, that means omissions are acceptable only when they remain recoverable from structure.
 
 ---
 
@@ -114,13 +114,13 @@ In the current AI application ecosystem, memory is typically deeply bound to the
 
 This binding is a form of implicit lock-in. You might want to switch models because a competitor is cheaper, faster, or better at a particular task, but the switching cost is too high -- not the technical cost, but the knowledge cost. Everything your AI assistant "knows" about you is locked inside one vendor's walled garden.
 
-AAAK breaks this binding. Because AAAK text can be understood by any model, your memories become a portable asset. Use Claude today, GPT-4 tomorrow, a local Llama the day after -- your AI assistant loads the same AAAK context after each switch, recovering its knowledge of you within 120 tokens.
+AAAK breaks this binding. Because AAAK text can be understood by any model, your memories become a portable asset. Use Claude today, GPT-4 tomorrow, a local Llama the day after -- as long as you provide the same AAAK text to the new model, it can recover the same compact representation of your context. The README uses roughly 120 tokens to describe that compressed context size; that is AAAK's target advantage as a format, not the measured default output of today's `wake-up` path.
 
-This is not a theoretical possibility. MemPalace's architecture already supports this usage: ChromaDB is stored locally, AAAK-compressed context is a plain text file, and MCP tools and CLI search are not bound to any specific model. Switching models only requires injecting the AAAK context into the new model's system prompt.
+This is not merely a theoretical possibility. MemPalace's architecture already supports the underlying portability claim: ChromaDB is stored locally, AAAK itself is plain text, and MCP tools plus CLI search are not bound to any specific model. More precisely, the current repository has already proven "AAAK as portable cross-model text," while the default `wake-up` entry point still mainly emits raw-text L0 + L1; once AAAK is fully wired into the wake-up path, switching friction falls even further.
 
 ### A Fully Offline Memory Stack
 
-AAAK's cross-model universality, combined with MemPalace's local architecture, produces an even more radical possibility: the entire memory stack can run completely offline.
+AAAK's cross-model universality, combined with MemPalace's local architecture, produces an even more radical possibility: once local dependencies and default embedding assets are prepared, the entire memory stack can run completely offline.
 
 Consider this tech stack:
 
@@ -129,7 +129,7 @@ Consider this tech stack:
 - **Compression**: AAAK, pure Python implementation, zero external dependencies
 - **Search**: ChromaDB's built-in vector search, local embedding model
 
-From data ingestion to memory storage, from search to context loading, not a single step requires an internet connection. No API calls, no cloud services, no data leaving your machine.
+More precisely: once local dependencies and default embedding assets are already in place, ingestion, storage, search, and context loading no longer require internet connectivity. No required API calls, no required cloud services, no mandatory data leaving your machine.
 
 This property holds extremely high value for specific user groups. Enterprises handling sensitive data (legal, medical, financial) cannot send memory data to third-party servers. Security researchers do not want their work records appearing in anyone's training data. Developers working in environments with unreliable networks need a memory system that does not depend on network connectivity.
 

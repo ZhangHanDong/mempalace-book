@@ -8,6 +8,8 @@ estimate: 0.5d
 
 展望 MemPalace 的扩展方向。宫殿结构可适配任何数据——代码库、文档、邮件、笔记。
 AAAK 进入 Closet 层的技术路线。开源社区的探索方向。
+必须明确：当前公开源码里 Closet 仍主要是概念/README 层，而不是已经独立落地的运行时存储层。
+也必须明确：当前 `searcher.py` 只支持显式 `wing` / `room` 过滤；知识图谱当前提供的是显式写入/查询层；README 里的 reviewer/architect/ops 属于示例化 specialist 方向，不是内建运行时体系。
 
 ## Decisions
 
@@ -44,3 +46,4 @@ Scenario: AAAK Closet 路线
   When 检查 AAAK Closet 讨论
   Then 解释了 AAAK 进入 Closet 层后的预期效果
   And 基于当前 dialect.py 的能力分析可行性
+  And 区分了当前 drawer-only 运行时与未来 explicit closet 路线

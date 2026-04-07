@@ -16,6 +16,7 @@ depends: [ch11-temporal-kg]
 - 深度：2 层（转换逻辑 → 应用场景）
 - 引用 knowledge_graph.py 的 timeline() 方法
 - 包含一个完整的 timeline 输出示例
+- 如果讨论溯源，需区分 schema 支持的 `source_closet/source_file` 与当前是否实际填充
 
 ## Boundaries
 

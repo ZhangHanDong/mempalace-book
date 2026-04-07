@@ -10,6 +10,8 @@ depends: [ch08-compression-constraints]
 深入 AAAK 语法设计：3 字母实体编码、管道分隔、箭头因果、星级重要性、情感标记。
 分析 dialect.py 的实现。核心洞察：模型第一次看到 spec 就能读写 AAAK，
 因为它本质上就是英语的极限压缩形态。
+如果引用 `mempalace_status` 注入 spec 的路径，需要注明这依赖 palace 已初始化；未初始化时 `status` 返回的是 `_no_palace()`。
+如果讨论 `dialect.py` 的 `generate_layer1()`，需要明确它是 AAAK 工具链里的独立生成功能，不是当前 `layers.py wake_up()` 默认接入的主路径。
 
 ## Decisions
 

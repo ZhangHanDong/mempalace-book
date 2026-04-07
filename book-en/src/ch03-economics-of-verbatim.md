@@ -100,34 +100,34 @@ This cost is not high --- entirely acceptable for professional users. But the pr
 
 ### Approach Three: MemPalace Wake-Up
 
-MemPalace's design employs an entirely different strategy. Instead of loading large quantities of memory summaries at each session, it loads a minimal "identity layer" --- who you are, who your team is, what your projects are --- and then performs precise retrieval only when needed.
+MemPalace's design employs an entirely different strategy. Instead of loading large quantities of memory summaries at each session, it loads a very small "identity layer" --- who you are, who your team is, what your projects are --- and then performs precise retrieval only when needed.
 
-The wake-up loads L0 (identity) and L1 (key facts), compressed with AAAK to approximately 170 tokens.
+By the current source baseline, wake-up loads L0 (identity) and L1 (key story / key facts), typically totaling **~600-900 tokens**. The more aggressive `~170 token / ~$0.70` figure often cited in the README corresponds to a later target path: rewrite L1 into AAAK and use that smaller representation for wake-up.
 
 ```
-Per-session loading: ~170 tokens
+Per-session loading: ~600-900 tokens
 Daily sessions: ~5
-Annual token consumption: 170 x 5 x 365 = 310,250 tokens
-Annual cost = 310,250 x $3 / 1,000,000 = ~$0.93
+Annual token consumption: 600-900 x 5 x 365 = 1,095,000-1,642,500 tokens
+Annual cost = ~$3.3-$4.9
 ```
 
-Less than one dollar. **~$1/year.** The README cites $0.70 based on more conservative assumptions (3 sessions per day, lower token pricing), but regardless of the calculation method, the order of magnitude is the same: annual cost under one dollar.
+Still only single-digit dollars. **~$3-$5/year.** The README's `$0.70` figure belongs to the future AAAK wake-up path; for the current default CLI, the correct order of magnitude is "a few dollars," not "a few hundred dollars."
 
-$1. Not $100, not $10. Less than $1. Per year.
+$5. Not $500, not $50. Single-digit dollars per year.
 
-To be fair, though, 170 tokens contain only your identity and basic facts --- they do not include any specific historical decisions. When you need to look up "why we chose Postgres," you need to perform retrieval.
+To be fair, though, 600-900 tokens still contain only your identity and the most important story layer --- not every specific historical decision. When you need to look up "why we chose Postgres," you still need retrieval.
 
 ### Approach Four: MemPalace Wake-Up + On-Demand Retrieval
 
-In actual use, MemPalace's workflow is: first load 170 tokens of wake-up information, then perform semantic retrieval as the conversation requires. Each retrieval returns approximately 2,500 tokens of relevant content (including original conversation fragments).
+In actual use, MemPalace's workflow is: first load 600-900 tokens of wake-up information, then perform semantic retrieval as the conversation requires. Each retrieval returns approximately 2,500 tokens of relevant content (including original conversation fragments).
 
 Assuming an average of 5 retrievals per session:
 
 ```
-Per-session loading: 170 + (5 x 2,500) = 12,670 tokens, approximately 13,500 tokens
+Per-session loading: 600-900 + (5 x 2,500) = 13,100-13,400 tokens
 Daily sessions: ~5
-Annual token consumption: 13,500 x 5 x 365 = 24,637,500 tokens
-Annual cost = 24,637,500 x $3 / 1,000,000 = ~$74
+Annual token consumption: 23,907,500-24,455,000 tokens
+Annual cost = ~$72-$73
 ```
 
 Wait --- this number looks higher than the summary approach? Let us correct the calculation.
@@ -135,13 +135,13 @@ Wait --- this number looks higher than the summary approach? Let us correct the 
 In practice, 5 retrievals/session is a high estimate. Most sessions require only 0--2 retrievals --- memory queries are needed only when the conversation involves historical decisions. A more realistic estimate is an average of 1 retrieval per session:
 
 ```
-Per-session loading: 170 + (1 x 2,500) = 2,670 tokens
+Per-session loading: 600-900 + (1 x 2,500) = 3,100-3,400 tokens
 Daily sessions: ~5
-Annual token consumption: 2,670 x 5 x 365 = 4,872,750 tokens
-Annual cost = 4,872,750 x $3 / 1,000,000 = ~$14.6
+Annual token consumption: 5,657,500-6,205,000 tokens
+Annual cost = ~$17-$19
 ```
 
-The README's quoted "5 searches" benchmark value of ~$10/year is based on different usage frequency assumptions. The key point is not the precise figure but the order of magnitude: **MemPalace's annual usage cost is in the $1--$15 range, while the summary approach is in the $200--$500 range.**
+The lower numbers quoted in the README still correspond to the future AAAK wake-up path. The key point is not the exact figure but the order of magnitude: **under the current default implementation, MemPalace's annual usage cost is roughly $3-$20 in common use (0-1 retrieval per session) and $70+ in heavier use, while the summary approach sits in the $200-$500 range.**
 
 ### Cost Comparison Summary Table
 
@@ -149,8 +149,8 @@ The README's quoted "5 searches" benchmark value of ~$10/year is based on differ
 |----------|----------------|-------------|----------|
 | Full paste | 19,500,000 (exceeds context window) | Not possible | N/A |
 | LLM summary | ~7,500 | ~$507/year | ~85% |
-| MemPalace wake-up | ~170 | <$1/year | N/A (identity layer only) |
-| MemPalace + on-demand retrieval | ~2,670--13,500 | ~$10/year | 96.6% |
+| MemPalace wake-up | ~600-900 | ~$3-$5/year | N/A (identity layer only) |
+| MemPalace + on-demand retrieval | ~3,100--13,400 | ~$17-$73/year | 96.6% |
 
 The last column is key: MemPalace is not only 50x cheaper but also 12 percentage points more accurate. This is not a "cheaper but slightly worse" approach --- it is superior on both dimensions simultaneously.
 
@@ -228,25 +228,25 @@ AI memory can adopt the same layered strategy:
 
 | Layer | Content | Size | Loading Timing |
 |-------|---------|------|----------------|
-| L0 | Identity --- who this AI is | ~50 tokens | Always loaded |
-| L1 | Key facts --- team, projects, preferences | ~120 tokens | Always loaded |
-| L2 | Topic memory --- recent sessions, current project | On-demand | When the topic arises |
+| L0 | Identity --- who this AI is | ~100 tokens | Always loaded |
+| L1 | Key story / key facts --- high-weight and recent memories | ~500-800 tokens | Always loaded |
+| L2 | Topic memory --- room-scoped recall | On-demand | On explicit recall / lightweight filtering |
 | L3 | Deep retrieval --- full semantic search | On-demand | When explicitly needed |
 
-L0 + L1 totals approximately 170 tokens, occupying less than 0.1% of the context window --- virtually no cost. But these 170 tokens tell the AI who you are, what your team structure is, and what project you are working on. This information enables the AI to correctly understand your subsequent questions and to initiate correct L2/L3 retrieval when needed.
+In the current implementation, L0 + L1 totals roughly 600-900 tokens. The README's more aggressive 170-token figure belongs to a later stage in which L1 is fully AAAK-ified. Even at the current size, though, this is still a relatively cheap persistent context layer, and more importantly it tells the AI who you are, what your team structure is, and what project you are working on so later retrieval can start from the right frame.
 
 ### Solution Three: Compression, Not Summarization
 
 A critical distinction must be made here: **compression and summarization are not the same thing.**
 
 Summarization is lossy --- it discards "unimportant" information (but who defines "unimportant"?).
-Compression is lossless (or near-lossless) --- it preserves all information using a more compact representation.
+Compression is ideally lossless (or near-lossless) --- it aims to preserve the same factual assertions in a more compact representation.
 
 Lossless text compression is generally believed to have limits --- natural language has finite redundancy. But what if the compression target is not for humans to read, but for AI to read?
 
 AI and humans process text differently. Humans need complete grammar, punctuation, and connectives to understand meaning. AI can recover full semantics from highly compressed structured text.
 
-A compression dialect designed for AI can achieve 30x compression while preserving all semantic information. For example:
+An AI-oriented compression dialect can, in principle, achieve very high compression while preserving the factual structure of a short, structured example. For example:
 
 **Original (~1000 tokens):**
 ```
@@ -264,9 +264,9 @@ PROJ: DRIFTWOOD(saas.analytics) | SPRINT: auth.migration→clerk
 DECISION: KAI.rec:clerk>auth0(pricing+dx)
 ```
 
-8x compression, zero information loss. An AI can perfectly recover the original semantics from the compressed form.
+In this example, the factual assertions are preserved and the representation is about 8x shorter. But the current open-source `dialect.compress()` path should not be confused with a universal strict-lossless guarantee: its real behavior includes key-sentence extraction, topic selection, and truncation of entities / emotions / flags. In the current repository, AAAK functions more like a high-compression index layered on top of raw Drawer storage than like the only copy of the memory.
 
-The essential difference between this compression approach and LLM summarization is: it makes no judgment about "what is important." It preserves all facts; only the representation changes. This is like gzip versus JPEG --- the former is lossless, the latter is lossy; the former can perfectly restore the original, the latter cannot.
+The ideal difference between AAAK-style compression and LLM summarization is: the former tries to preserve factual structure while changing representation, whereas the latter decides what to keep and what to discard. In the current implementation, the raw text remains preserved in Drawers, and the AAAK-like layer is best read as a compact navigational representation rather than a perfect substitute for the original.
 
 ---
 
@@ -282,7 +282,7 @@ Correcting this equation means:
 
 1. **Do not optimize at the storage end.** The cost of storing all raw data is near zero. Any "optimization" done at the storage end (such as summarization extraction) merely adds risk (information loss) without reducing cost.
 
-2. **Optimize at the retrieval end.** The real cost savings come from loading fewer but more accurate tokens into the LLM context. 170 tokens for wake-up vs. 7,500 tokens of summaries --- not because 170 tokens have higher information density (though they do), but because 170 tokens are sufficient, and the rest can be precisely retrieved on demand.
+2. **Optimize at the retrieval end.** The real cost savings come from loading fewer but more accurate tokens into the LLM context. Today's 600-900-token wake-up versus 7,500 tokens of summaries already demonstrates this advantage; if the README's AAAK wake-up path is fully connected later, that gap grows even further.
 
 3. **Invest at the organization end.** The 34% retrieval improvement comes from how data is organized --- this is the highest-ROI component of the entire approach. Good data organization can make simple retrieval algorithms match the performance of complex algorithms on unorganized data.
 
@@ -306,7 +306,7 @@ The reader should now have a clear understanding of the following points:
 But we have not yet answered the specific "how":
 
 - What data organization structure produces that 34% retrieval improvement?
-- What exactly does the 170-token wake-up information contain? How is it generated?
+- What exactly does the current ~600-900-token wake-up contain, and what would the README's ~170-token AAAK path change?
 - How does the on-demand semantic search work?
 - How is 30x lossless compression achieved?
 

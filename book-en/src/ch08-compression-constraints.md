@@ -10,7 +10,7 @@ The previous chapters discussed how the memory palace's spatial structure improv
 
 Let us return to the core number from the preface: six months of daily AI use produces approximately 19.5 million tokens. Even after organizing data through the palace structure, when the AI needs to load baseline context at the start of a session -- "who is this person, what project are they working on, who are they working with" -- the data volume remains hopelessly large.
 
-The intuitive framing of this problem is simple: can we compress a 1,000-token natural language description into 30-120 tokens while guaranteeing that a language model reading the compressed result can accurately reconstruct all the original information?
+The intuitive framing of this problem is simple: can we compress a 1,000-token natural language description into 30-120 tokens while still preserving the factual content a language model would later need?
 
 This seemingly impossible requirement is precisely what AAAK attempts to answer.
 
@@ -26,23 +26,32 @@ MemPalace's compression requirements can be precisely stated as four constraints
 
 The 19.5 million tokens of context over six months, even after memory layer filtering (discussed in detail in Chapters 14-15), still requires the L1 layer -- the critical facts layer that the AI must load at every startup -- to accommodate a large amount of information.
 
-MemPalace's design goal is to keep the L1 layer at approximately 120 tokens. This means team structures, project states, key decisions, and personal preferences that might otherwise require thousands of tokens to describe must be compressed to roughly 30x or less.
+The README presents AAAK as capable of roughly 30x compression. That number needs to be unpacked. Two things must be distinguished first: the design goal discussed in the README and this chapter, and the concrete current behavior of the open-source plain-text compressor in `dialect.compress()`. The former asks what kind of compression language could plausibly satisfy the constraints. The latter is a current implementation with obvious heuristic selection built in.
 
-Why 30x rather than 10x or 100x? This number is not arbitrary. 10x compression can be achieved through simple redundancy removal (dropping articles, prepositions, repeated descriptions), but this only compresses 1,000 tokens to 100 tokens -- still not compact enough for a complete team description. 100x compression almost certainly means information loss, because the information entropy of English dictates that you cannot losslessly express 1,000 tokens of content in 10 tokens.
+AAAK is really doing two different kinds of work:
 
-30x is the sweet spot in this engineering tradeoff: aggressive enough to achieve genuine token economy, yet conservative enough to preserve information completeness.
+1. **Structured-expression compression** -- removing stopwords, abbreviating entity names, and using pipe-delimited structure to express the same batch of facts more compactly. In short structured examples, this can deliver roughly **5-10x** compression.
+2. **Heuristic selection** -- extracting key sentences, selecting topics, and truncating entities / emotions / flags. This is the current plain-text `compress()` path: it chooses what seems worth retaining from longer text rather than performing a strict representation-preserving rewrite of every assertion.
 
-### Constraint 2: Zero Information Loss
+For long, redundant conversation logs filled with phrases like "well, I think maybe we should consider...", the two effects combined can indeed reach the README's 30x number. But for already compact technical descriptions, the ratio is often closer to 5-10x.
+
+So "30x" is an upper-bound figure for verbose conversation data, not the typical ratio for every text type. More importantly, the selection steps do not happen only in `_extract_key_sentence()`: topics, entities, emotions, and flags also involve top-k or heuristic pruning. In other words, the current repository's plain-text AAAK is closer to a high-compression index than to a strict lossless encoder, even though the original text remains preserved in Drawers.
+
+That distinction is crucial for understanding AAAK: **the README's lossless AAAK is a design target; the current open-source plain-text compressor is a lossy heuristic index; the 30x figure comes from structured expression and content selection acting together.**
+
+### Constraint 2: Factual Assertion Completeness
 
 This is the fundamental dividing line between MemPalace and all "summary-based" memory systems.
 
 When Mem0 or Zep's system extracts "user prefers Postgres" from your conversation, it discards the entire context of you spending two hours explaining why you migrated from MongoDB. When an LLM is asked to "summarize the key points of this conversation," it must make a judgment -- what counts as a key point and what does not -- and that judgment itself is an irreversible act of information discarding.
 
-MemPalace's position is: the compressed representation must contain all semantic information from the original text. A model reading the compressed result should be able to answer any question about the original content, including details that seemed unimportant at compression time but later proved critical.
+MemPalace's position is that the **ideal AAAK design target** should preserve factual assertions as completely as possible. The README uses "lossless" to describe that target, but it needs both a precise operational definition and an honest separation between that target and the current heuristic implementation.
 
-"Zero information loss" requires an operational definition. In MemPalace's context, it does not mean "the compressed text is word-for-word identical to the original" (that would not be compression), but rather "for every factual assertion in the original text, there exists a corresponding encoding in the compressed text such that a competent language model can correctly reconstruct that assertion."
+In the AAAK context, "lossless" works best as a **design-constraint definition**: for every factual assertion in the original text -- who, did what, when, why, with what result -- an ideal AAAK encoding should contain a corresponding representation such that a competent language model can reconstruct that assertion correctly.
 
-This definition limits "information" to the level of factual assertions -- who, did what, when, why, with what result -- and excludes stylistic elements, rhetorical devices, or phrasing preferences. This is a deliberate boundary: MemPalace stores memories, not literary works.
+But this definition has an important boundary: it describes the ideal constraint, not a line-by-line factual description of today's `dialect.compress()`. The current plain-text implementation performs selection on key sentences, topics, entities, emotions, and flags. Assertions removed by those filters do not appear in the AAAK output. MemPalace's safety net is that the original text remains preserved in Drawers, so AAAK functions more like a high-compression index than like the only copy of the memory. What gets lost is not the underlying stored memory, but the coverage of the compressed index.
+
+This definition also intentionally excludes style, rhetoric, and phrasing preference. MemPalace stores memories, not literary works.
 
 ### Constraint 3: Readable by Any Text Model
 
@@ -158,7 +167,7 @@ After eliminating five approaches, the constraint space narrows dramatically. Le
 
 **Must be self-explanatory** -- because Constraint 4 requires no decoder; the compressed text itself must carry enough context for a model to understand its meaning.
 
-**Must preserve all factual assertions** -- because Constraint 2 requires zero information loss; every entity, relationship, attribute, and event must have a corresponding representation after compression.
+**Must preserve factual assertions as completely as possible** -- because Constraint 2 is about factual completeness; every entity, relationship, attribute, and event should have a corresponding representation after compression, even if today's heuristic compressor does not always achieve that ideal in full.
 
 **Must be extremely compact** -- because Constraint 1 requires a 30x compression ratio; each token must carry information density far exceeding natural English.
 

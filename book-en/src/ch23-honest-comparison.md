@@ -73,13 +73,13 @@ This is one of MemPalace's core advantages and also the easiest dimension to qua
 | System | Monthly Cost | Annual Cost | Cost Composition |
 |--------|-------------|-------------|-----------------|
 | MemPalace (raw) | $0 | $0 | No API calls |
-| MemPalace (hybrid + rerank) | ~$0.30 | ~$3.60 | ~1000 queries x $0.001/query |
+| MemPalace (hybrid + rerank) | ~$0.30 | ~$3.60 | ~300 queries x $0.001/query |
 | Mastra | Variable | Variable | GPT-5-mini API cost |
 | Mem0 | $19-249 | $228-2,988 | Subscription |
 | Zep | $25+ | $300+ | Subscription |
 | Letta (MemGPT) | $20-200 | $240-2,400 | Subscription |
 
-MemPalace's raw mode cost is zero. Literally zero. No API calls, no cloud services, no subscription fees. ChromaDB runs locally, the embedding model (all-MiniLM-L6-v2) ships with ChromaDB, requires no separate download and no GPU.
+MemPalace's raw mode cost is zero. Literally zero in day-to-day operation. No API calls, no cloud services, no subscription fees. ChromaDB runs locally, and the current baseline uses ChromaDB's default local embedding path. More cautiously stated: the repository does not vendor the default embedding asset directly into the repo, so the most accurate claim remains that once the initial asset-preparation step is complete, day-to-day raw queries cost zero.
 
 Even with the optional Haiku rerank, each query costs approximately $0.001 -- one dollar per thousand queries. Assuming an active user makes 10 memory searches per day, a month of 300 queries costs $0.30.
 
@@ -98,7 +98,7 @@ But to be fair, Mem0 and Zep's pricing includes things MemPalace doesn't provide
 | Supermemory | Cloud | Full API | Vendor holds data |
 | Mastra | Depends on deployment | GPT API | OpenAI holds query data |
 
-MemPalace's raw mode is the only mainstream AI memory system on the market that truly achieves "zero data egress." Not "we encrypt the data," not "we're SOC 2 compliant," but physically no network requests go out. ChromaDB runs locally, embedding computation is local, search is local. Your conversation records -- containing technical decisions, internal discussions, code snippets, even personal preferences -- all remain on your disk.
+MemPalace's raw mode is one of the very few mainstream AI memory systems that gets close to "zero data egress" in day-to-day use. Not "we encrypt the data," not "we're SOC 2 compliant," but that the main raw search loop does not need to send queries and memories to a third-party API. ChromaDB runs locally, embedding computation is local, and search is local. More cautiously stated, other chapters in this book already note that default embedding assets still have an initial preparation step; after that, your conversation records -- containing technical decisions, internal discussions, code snippets, even personal preferences -- can remain on your disk.
 
 The hybrid mode introduces a privacy trade-off: when LLM rerank is enabled, the first 500 characters of top-K candidate sessions are sent to Anthropic's API for reranking. This means a small amount of conversation content leaves your machine per query. But this is optional and controllable: you can choose not to use rerank and accept 96.6% accuracy, or use rerank to pursue higher accuracy.
 
@@ -108,7 +108,7 @@ Zep deserves special mention: it's the most serious commercial product in this s
 
 | System | Available without API | APIs Required | Offline Operation |
 |--------|----------------------|---------------|-------------------|
-| MemPalace (raw) | Fully available | None | Fully offline |
+| MemPalace (raw) | Fully available | None | Offline after cold-start preparation |
 | MemPalace (hybrid) | 96.6% available, 100% requires API | Anthropic (optional) | Partially offline |
 | Mastra | Unavailable | OpenAI (GPT-5-mini) | Not supported |
 | Mem0 | Unavailable | Own API + LLM API | Not supported |
@@ -186,7 +186,7 @@ From the four-dimensional comparison, MemPalace's competitive advantages can be 
 
 **On the cost dimension**, MemPalace is the only zero-cost option. All other systems require at least API call costs or subscription fees.
 
-**On the privacy dimension**, MemPalace's raw mode is the only truly zero data egress solution.
+**On the privacy dimension**, MemPalace's raw mode is the closest thing here to a no-routine-data-egress solution, once local assets are prepared.
 
 **On the API dependency dimension**, MemPalace is the only system that remains competitive without any API.
 
@@ -256,7 +256,7 @@ Behind all these comparisons are two fundamentally different design philosophies
 
 **Route A: "Let AI decide what's worth remembering."** This is the route of Mem0, Mastra, and Supermemory. The LLM reads the conversation, extracts key information, and discards the rest. The advantage is compact storage and small search space. The disadvantage is irreversible loss of original context -- once extraction goes wrong, there's no going back.
 
-**Route B: "Preserve everything, use structure to organize."** This is MemPalace's route. No information filtering, verbatim preservation of original conversations. Palace structure (Wing, Hall, Room, Closet, Drawer) handles organization; semantic search handles retrieval. The advantage is zero information loss and zero API dependency. The disadvantage is a larger search space and harder multi-hop reasoning.
+**Route B: "Preserve everything, use structure to organize."** This is MemPalace's route. No information filtering at the raw-storage layer, verbatim preservation of original conversations, and structure on top of that raw base. The advantage is preserving the source material and avoiding mandatory API dependency in the raw path. The disadvantage is a larger search space and harder multi-hop reasoning, while some higher-level compressed representations still remain heuristic rather than perfectly lossless.
 
 LongMemEval results show: Route B's retrieval precision is not lower than Route A's, and is in fact higher. 96.6% vs 85-95% isn't a fluke -- it reflects a fundamental truth: when you've preserved all original text, the answer is always there waiting to be found. When you let an LLM extract memories, the answer may have already been "extracted" away.
 

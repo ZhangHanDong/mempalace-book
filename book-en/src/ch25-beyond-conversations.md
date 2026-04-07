@@ -37,9 +37,9 @@ Closet = module's compressed summary (design intent, key constraints, known limi
 Drawer = raw content (related conversation records, PR descriptions, design document fragments)
 ```
 
-The most valuable part of this mapping is **Tunnel** -- cross-Wing conceptual connections. When both `payment-service` and `user-frontend` have a Room named `auth-middleware`, Tunnel automatically links them. This means when you search for authentication-related design decisions, you can simultaneously see both the backend and frontend perspectives -- even if they were discussed at different times, in different conversations.
+The most valuable part of this mapping is **Tunnel** -- cross-Wing conceptual connections. When both `payment-service` and `user-frontend` have a Room named `auth-middleware`, Tunnel can tie them together at the graph layer. This means a deeper codebase-memory workflow could surface both backend and frontend perspectives on authentication-related design decisions, even if they were discussed at different times in different contexts.
 
-Among MemPalace's three existing mining modes, the `projects` mode (`mempalace mine <dir>`) already supports ingestion of code and documentation files. The current implementation maps code files to Wing and Room by directory structure. Building on this, deeper adaptations -- such as automatically generating Hall connections between Rooms based on code import relationships, or extracting temporal change information from Git history -- are engineerably feasible extensions.
+Among MemPalace's three existing mining modes, the `projects` mode (`mempalace mine <dir>`) already supports ingestion of code and documentation files. More precisely, the current implementation gets `wing` from `mempalace.yaml` or a `--wing` override, and routes `room` through a mix of path hits, filename hints, and content keywords. That is already enough to support "ingest project files into one palace and retrieve them by room," but it is not well described as "maps code files to Wing and Room by directory structure." Building on this, deeper adaptations -- such as generating stronger cross-room structure from import relationships or extracting temporal change information from Git history -- remain engineerable extensions.
 
 ---
 
@@ -58,7 +58,7 @@ Hall = document type (hall_facts: specifications and standards, hall_events: mee
        hall_advice: implementation guidelines)
 ```
 
-The key advantage of this structure is: when searching, you don't need to know the document's title or tags -- you only need to describe the information you're looking for, and the system navigates to the relevant sub-space through Wing and Room semantic filtering. A natural language query like "what special requirements does our data retention policy have for EU users" would be navigated to `wing_compliance / hall_facts / gdpr-data-retention`, then semantic retrieval is performed within this precise sub-space.
+The key advantage of this structure is: when searching, you don't need to know the document's title or tags -- you only need to describe the information you're looking for, and the system can use Wing / Room structure to narrow the search space. If document-memory adaptation is pushed further, a natural-language query like "what special requirements does our data retention policy have for EU users" could be organized toward something like `wing_compliance / gdpr-data-retention` before semantic retrieval. What needs to stay separate from the current implementation is that the public `searcher.py` supports only explicit `wing` / `room` filtering; it does not yet auto-classify natural-language queries into `hall_facts` or a specific room at runtime.
 
 ---
 
@@ -94,9 +94,11 @@ All the above extension directions can be implemented on MemPalace's current arc
 
 To understand the implications of this evolution, you first need to understand how the Closet layer currently works.
 
-In the current implementation, Closet stores natural language summaries of raw text. When you `mempalace mine` a batch of conversations, the system chunks the conversations, stores each chunk in a Drawer (raw content), and simultaneously generates summary information for each Wing/Room combination, stored in Closet. During search, the system first queries the Closet layer's summaries to locate relevant areas, then retrieves raw content from the corresponding Drawers.
+To understand the significance of this evolution, the conceptual layer and the current runtime have to be separated.
 
-The summaries in Closet are currently ordinary English text. They're designed for AI reading -- but they don't leverage AAAK's compression capability.
+More accurately, the current public repository does not yet expose an explicit Closet storage layer. `mempalace mine` currently writes chunked raw text directly into `mempalace_drawers`; the main metadata fields are `wing`, `room`, `source_file`, and similar tags. `searcher.py`'s default path also queries that drawers collection directly and returns verbatim text. In other words, Drawer is the runtime layer that is clearly implemented today; Closet is still much closer to the README and benchmark narrative of a navigational middle layer.
+
+So when the README says "add AAAK directly to the closets," it is not describing a fully implemented subsystem waiting only for a new encoding. It is describing the next step: turn that conceptual / experimental middle layer into an explicit compressed navigation layer.
 
 MemPalace's README explicitly mentions this evolution direction:
 
@@ -147,11 +149,11 @@ Several specific exploration spaces worth highlighting:
 
 **Diversification of ingestion pipelines.** The current `convo_miner.py` handles normalization of five conversation formats. The same pipeline pattern can be extended to more data types: ingestion of Git commits and PR comments, ingestion of Obsidian vaults, ingestion of browser bookmarks and highlights. Each data type needs a normalizer (converting raw format to standard structure); the rest of the palace logic can be reused.
 
-**Automatic discovery of Wing/Room.** The current `mempalace init` helps users define Wings and Rooms through guided dialogue. For large datasets, automatic discovery may be more practical -- using cluster analysis to automatically identify domain boundaries (Wings) and concept nodes (Rooms) in the data. This is especially valuable in scenarios with large data volumes like document libraries and email archives.
+**Automatic discovery of Wing/Room.** The current `mempalace init` is closer to "local scan + interactive confirmation": it detects candidate rooms from directories, filenames, and content, then lets the user accept, edit, or extend them. For large datasets, stronger automatic discovery may be more practical -- using clustering or other structure-learning methods to identify domain boundaries (Wings) and concept nodes (Rooms). This is especially valuable in document libraries and email archives.
 
-**Cross-source fusion of the knowledge graph.** When different types of data are ingested into the same palace, the knowledge graph (`knowledge_graph.py`) can automatically discover cross-data-source entity relationships. A client name mentioned in email, the same name appearing in code comments, the same client discussed in meeting minutes -- the knowledge graph's temporal triples can automatically link these scattered pieces of information.
+**Cross-source fusion of the knowledge graph.** When different types of data are ingested into the same palace, the knowledge graph (`knowledge_graph.py`) provides a local triple store capable of holding cross-source entity relationships. A client name mentioned in email, the same name appearing in code comments, and the same client discussed in meeting minutes could, in principle, all be expressed as temporal triples inside the same graph. What must be clarified is that the public repository clearly implements the `add_triple` / `query_entity` layer, not a fully automatic cross-source extraction-and-fusion pipeline.
 
-**Domain extension of Specialist Agents.** The current Agent architecture (reviewer, architect, ops) is designed for software development scenarios. The same mechanism -- an Agent owning its own Wing and AAAK diary -- can be extended to other domains: a sales agent tracking client relationship evolution, a research agent tracking paper reading and research directions, a legal agent tracking changes in compliance requirements.
+**Domain extension of Specialist Agents.** The README has used reviewer, architect, and ops as software-development specialist examples, but the current public repository actually implements a lower-level generic mechanism: any `agent_name` can own its own `wing_<agent>/diary`. Precisely because that base is simple, the same storage structure could be extended to other domains: a sales agent tracking client-relationship evolution, a research agent tracking papers and research directions, or a legal agent tracking changes in compliance requirements.
 
 ---
 

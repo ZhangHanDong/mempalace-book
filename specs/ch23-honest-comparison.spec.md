@@ -11,6 +11,9 @@ depends: [ch22-benchmark-methodology]
 从成本、准确率、隐私、API 依赖四个维度。
 赢在哪里（LongMemEval 100%、零成本）。
 输在哪里（LoCoMo 60.3%）。
+如果讨论 raw 模式的本地/离线优势，需要区分冷启动准备与之后的日常运行，避免把"长期离线可用"写成"从零开始绝对无网络前提"。
+如果讨论默认 embedding，不要把它写成仓库直接 vendoring 的资产；更准确的口径是 ChromaDB 默认的本地 embedding 路径。
+成本表里的月度/年度数字要和每次查询成本的示例算术一致。
 
 ## Decisions
 

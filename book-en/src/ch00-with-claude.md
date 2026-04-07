@@ -2,7 +2,7 @@
 
 At some point in 2025, a Hollywood actress and the CEO of a Bitcoin company started writing software with an AI.
 
-That sentence sounds like the opening of a Silicon Valley parable, but it actually happened. The project was called MemPalace, an AI memory system. A few months later, it achieved the highest score ever recorded on academic benchmarks. And the most interesting part of the entire story is not the final result, but how the thing was built.
+That sentence sounds like the opening of a Silicon Valley parable, but it actually happened. The project was called MemPalace, an AI memory system. A few months later, it posted benchmark results that were unusually strong by the standards of public AI memory systems. And the most interesting part of the entire story is not the final result, but how the thing was built.
 
 ---
 
@@ -78,7 +78,7 @@ That kind of connection --- spanning time, spanning disciplines --- remains a un
 
 ## So What Did They Build?
 
-Months of collaboration produced a memory system. It scored 96.6% on the LongMemEval benchmark raw --- no external API calls, no cloud service dependencies, running entirely locally. With a lightweight reranking step, the score reached 100% --- all 500 questions answered correctly.
+Months of collaboration produced a memory system. It scored 96.6% on the LongMemEval benchmark raw --- no external API calls, no cloud service dependencies in the raw path, and a largely local runtime once assets are prepared. With a lightweight reranking step, the benchmark reached 100% on the full 500-question set; elsewhere in the book we also keep the cleaner held-out 450 score separate rather than collapsing everything into one number.
 
 Among all publicly available AI memory systems, free or paid, there is no higher score.
 

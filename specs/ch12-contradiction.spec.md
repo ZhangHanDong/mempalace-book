@@ -16,6 +16,7 @@ depends: [ch11-temporal-kg]
 - 深度：3 层（检测机制 → 实现 → 精度权衡）
 - 使用 README 中的 3 个矛盾检测示例
 - 引用 knowledge_graph.py 的查询逻辑
+- 如果讨论 `source_closet` 溯源，需明确它依赖写入时提供该可选字段
 
 ## Boundaries
 

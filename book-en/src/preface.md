@@ -29,7 +29,7 @@ Yet the discussion around MemPalace has largely remained on two levels: surprise
 
 This book attempts to fill that gap.
 
-**This is not a tutorial --- it is a design analysis.** You will not find "step one: install, step two: configure" instructions here --- MemPalace's README and documentation already do that well enough. This book is concerned with deeper questions: Why can ancient Greek memory techniques be effective again in the era of large language models? Why can a zero-API-call local system achieve 96.6% retrieval precision, reaching 100% with a single lightweight reranking step? Why can a compression dialect designed for AI achieve 30x compression with zero information loss? Why does abandoning "let the AI decide what's worth remembering" actually produce better results?
+**This is not a tutorial --- it is a design analysis.** You will not find "step one: install, step two: configure" instructions here --- MemPalace's README and documentation already do that well enough. This book is concerned with deeper questions: Why can ancient Greek memory techniques be effective again in the era of large language models? Why can a zero-API-call local system achieve 96.6% retrieval precision, reaching 100% with a single lightweight reranking step? Why can a compression dialect designed for AI aim for extremely high compression while still trying to preserve factual structure? Why does abandoning "let the AI decide what's worth remembering" actually produce better results?
 
 Behind every design decision lies a concrete engineering problem. This book's job is to make the relationship between those problems and decisions clear.
 
@@ -59,7 +59,7 @@ This stance gave rise to three key designs:
 
 **The Memory Palace Structure.** Borrowing from the ancient Greek orators' memory technique --- remembering an entire speech by placing ideas in different rooms of an imaginary building --- MemPalace organizes your memories as Wings (people and projects), Halls (memory types), and Rooms (specific concepts). This spatial metaphor is not decoration; it is a real retrieval acceleration mechanism: structural organization alone produced a 34% retrieval precision improvement.
 
-**The AAAK Compression Dialect.** This is a lossless shorthand language designed specifically for AI agents. It is not meant for humans to read --- it is meant for your AI to read, and it reads fast. 30x compression, zero information loss. Your AI loads months of context in roughly 120 tokens. Because AAAK is essentially structured text with universal grammar, it works with any model that can read text --- Claude, GPT, Gemini, Llama, Mistral --- no decoder needed, no fine-tuning, no cloud API.
+**The AAAK Compression Dialect.** This is a shorthand language designed specifically for AI agents. It is not meant for humans to read --- it is meant for your AI to read, and it reads fast. For structured information such as teams, projects, and decisions, format compression can often reach 5-10x while preserving factual assertions; for long, redundant conversation logs, the README's 30x claim comes from combining structured expression with content selection. That is powerful, but not identical to a blanket "zero-loss" guarantee for the current plain-text compressor. Because AAAK is essentially structured text with universal grammar, it works with any model that can read text --- Claude, GPT, Gemini, Llama, Mistral --- no decoder needed, no fine-tuning, no cloud API.
 
 **The Four-Layer Memory Stack.** From temporary working memory to long-term persistence, MemPalace simulates the memory hierarchy from cognitive science. Different layers have different lifespans, different compression strategies, and different retrieval paths. This is not a flat key-value store --- it is a time-aware knowledge graph.
 
@@ -88,7 +88,7 @@ This path covers the system's skeleton, giving you an understanding of the overa
 If you are more interested in how to integrate similar memory capabilities into your own AI applications, start with these chapters:
 
 - **Part 1 (Chapters 1--3): Problem Space** --- Start with the problem, as before.
-- **Part 3 (Chapters 8--10): AAAK Compression Language** --- Understand how this AI-oriented lossless compression dialect was designed and why it works on any model. This may be MemPalace's most original contribution.
+- **Part 3 (Chapters 8--10): AAAK Compression Language** --- Understand how this AI-oriented compression dialect was designed, where its current heuristic implementation stops, and why its text-first format works on any model. This may be MemPalace's most original contribution.
 - **Part 6 (Chapters 16--18): Data Ingestion Pipeline** --- The complete flow from raw conversation data to structured memory.
 - **Part 7 (Chapters 19--21): Interface Design** --- MCP toolset, command-line interface, and local model integration.
 - **Part 9 (Chapters 24--25): Design Philosophy and the Future** --- Broader implications of MemPalace's design philosophy for AI application development.

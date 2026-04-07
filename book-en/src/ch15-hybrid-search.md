@@ -218,7 +218,7 @@ If a user conducts 5 deep-search conversations per day, each triggering one Haik
 
 But in reality, not every search requires reranking. Most queries get correct results in the pure vector retrieval phase (96.6% of cases). If reranking is only triggered for low-confidence results, actual call frequency is even lower.
 
-The "$0.70/year" cited in the README more specifically refers to the wake-up cost -- L0 + L1 loaded once daily, ~170 tokens each time. This and reranking are two separate cost items, but they are consistent in magnitude: both in the "dollars per year" range.
+The `$0.70/year` cited in the README more specifically refers to the target wake-up cost -- L0 + L1 loaded once daily after the AAAK wake-up path is fully wired through, at roughly 170 tokens each time. The current default implementation is higher, but still in the same "single-digit dollars per year" band for wake-up alone. This and reranking are two separate cost items, but they remain consistent in magnitude: both are in the "dollars per year" range rather than the "hundreds per year" range.
 
 By contrast, the gap between MemPalace's annual cost (pure local $0, with Haiku reranking ~$1-2) and competitors (Mem0, Zep, etc. at $228-$2,988 annually) is not a matter of percentage points -- it is three orders of magnitude. For complete competitor cost comparison data, see Chapter 23.
 

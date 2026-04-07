@@ -7,9 +7,9 @@ depends: [ch14-memory-layers]
 
 ## Intent
 
-分析纯 ChromaDB 语义搜索达到 96.6% 后，加入 Haiku 重排序如何到达 100%。
+分析纯 ChromaDB 语义搜索达到 96.6% 后，加入 Haiku 重排序如何在完整 500 题上到达 100%。
 深入分析 3.4% 的失败案例：语义相似但答案不在 top-5 的情况。
-向量距离到语义理解的跃迁。成本分析：500 次 Haiku 调用 ≈ $0.70。
+向量距离到语义理解的跃迁。必须同时交代 `BENCHMARKS.md` 中的 held-out 450 = 98.4% 这一更诚实的泛化数字。成本分析应聚焦 rerank 增量成本（约 $0.001/次），不要与 wake-up 的 $0.70 混写。
 
 ## Decisions
 
@@ -46,6 +46,7 @@ Scenario: 混合方案成本效益
   When 检查混合方案分析
   Then 包含 Haiku 调用成本的具体计算
   And 分析了 96.6% → 100% 的边际价值
+  And 区分了 full-500 benchmark 成绩与 held-out 泛化数字
 
 Scenario: 源码引用
   Test: manual_review_source

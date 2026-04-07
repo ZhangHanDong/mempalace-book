@@ -16,6 +16,7 @@ estimate: 0.5d
 - 引用 benchmarks/ 目录的 runner 代码结构
 - 引用 benchmarks/BENCHMARKS.md 的方法论部分
 - 包含每个 benchmark 的特征对比表
+- 需要区分 96.6% raw、100% full-500 competitive score、98.4% held-out clean score 三种口径
 
 ## Boundaries
 
@@ -50,3 +51,4 @@ Scenario: 可复现性
   Given 第 22 章内容
   When 检查可复现性描述
   Then 指明了 runner 代码的位置和运行方式
+  And 交代了 benchmark 文档如何同时公布最好成绩与更克制的 held-out 数字

@@ -6,9 +6,9 @@ estimate: 0.5d
 
 ## Intent
 
-分析 MemPalace 的专家代理架构：每个 agent 一个 wing + 一本 AAAK 日记。
-reviewer 记住 bug 模式、architect 记住设计决策、ops 记住事故。
-50 个 agent 不膨胀的秘密。与 Letta（$20-200/月）对比。
+分析 MemPalace 的专家代理方向：当前实现是每个 agent 一个 wing + 一本 diary 的最小存储层，
+README 进一步展示了 AAAK 日记和多 agent 扩展的目标路径。reviewer 记住 bug 模式、architect 记住设计决策、ops 记住事故。
+重点解释为什么这种结构有扩展潜力，以及当前实现与 README 愿景之间的边界。与 Letta（$20-200/月）对比。
 
 ## Decisions
 
@@ -35,8 +35,8 @@ Scenario: 架构清晰
   Test: manual_review_architecture
   Given 第 20 章内容
   When 检查 agent 架构
-  Then 理解每个 agent 的存储结构（wing + diary）
-  And 理解为什么 50 个 agent 不增加配置复杂度
+  Then 理解当前代码已经实现的存储结构（wing + diary）
+  And 理解 README 中的多 agent 扩展方向与当前实现的差异
 
 Scenario: 日记格式示例
   Test: manual_review_diary
@@ -44,3 +44,4 @@ Scenario: 日记格式示例
   When 检查 AAAK 日记
   Then 包含具体的日记写入和读取示例
   And 展示 AAAK 格式如何压缩 agent 的专业知识
+  And 明确 diary_write 当前不会强制校验 AAAK

@@ -259,7 +259,7 @@ python benchmarks/locomo_bench.py /tmp/locomo/data/locomo10.json --granularity s
 python benchmarks/convomem_bench.py --category all --limit 50
 ```
 
-No API key needed. No GPU needed. No network connection needed (after data download). No configuration files needed.
+The raw baseline path needs no API key and no GPU. After benchmark data and default embedding assets are prepared, it can be rerun offline. The important caveat is that enabling diary or LLM rerank paths also requires network access and an API key. No complex configuration files are needed.
 
 ### Auditability of Results
 

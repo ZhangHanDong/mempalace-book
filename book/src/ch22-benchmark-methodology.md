@@ -41,13 +41,15 @@ LongMemEval 的 500 个问题覆盖六种题型，每种测试不同的检索难
 
 最弱的两个类别揭示了更深的问题。single-session-preference（93.3%）弱在偏好表达的间接性：用户说"我觉得 Postgres 在并发场景下更靠谱"，问题问的是"用户偏好什么数据库"——词汇完全不重叠，embedding 模型看不出两者的关联。single-session-assistant（92.9%）弱在索引缺口：默认只索引了用户发言，问题却问的是"AI 建议了什么"——答案根本不在搜索池里。
 
-这两个弱点后来都被修复了。偏好缺口通过 16 个正则表达式模式提取偏好表达来弥补。助手缺口通过两阶段检索——先用用户发言定位 session，再在目标 session 内搜索助手发言——来解决。修复后分数从 96.6% 推进到了 99.4%，再到 100%。
+这两个弱点后来都被修复了。偏好缺口通过 16 个正则表达式模式提取偏好表达来弥补。助手缺口通过两阶段检索——先用用户发言定位 session，再在目标 session 内搜索助手发言——来解决。修复后分数从 96.6% 推进到了 99.4%，再到完整 500 题上的 100%。但同一份 `BENCHMARKS.md` 也同时公布了 `hybrid_v4` 在 held-out 450 上的 `98.4% R@5 / 99.8% R@10`，并把它标成更诚实的泛化数字。
 
 ### 为什么选它
 
 LongMemEval 是目前 AI 记忆领域引用最广的 benchmark。Supermemory、Mastra、Mem0、Hindsight——所有主要竞品都在这个 benchmark 上报告了成绩。这意味着分数之间有直接可比性。如果你在 LongMemEval 上的 R@5 是 96.6%，而 Mastra 是 94.87%，这两个数字用的是同一把尺子。
 
 它的数据是公开的——托管在 HuggingFace 上，任何人都可以下载。它的评估指标是标准化的——Recall@K 和 NDCG@K 有明确的数学定义。这些属性使它成为可复现基准测试的理想选择。
+
+更重要的是，MemPalace 的 benchmark 文档没有只公布一个最好看的数字。它把 `96.6% raw`、`100% full-500 + rerank`、以及 `98.4% held-out hybrid_v4` 三组数字一起放出来，分别对应产品基线、竞争成绩和更干净的泛化检查。对一本讨论方法论的书来说，这种"并列展示不同口径"本身就是值得强调的方法论成熟度。
 
 ### 盲区
 
@@ -259,7 +261,7 @@ python benchmarks/locomo_bench.py /tmp/locomo/data/locomo10.json --granularity s
 python benchmarks/convomem_bench.py --category all --limit 50
 ```
 
-不需要 API key。不需要 GPU。不需要网络连接（数据下载完成后）。不需要任何配置文件。
+raw 基线路径不需要 API key，不需要 GPU；在 benchmark 数据和默认 embedding 资产准备完成后，可以离线复跑。需要单独补清楚的是：如果启用 diary 或 LLM rerank，则还需要网络和 API key。不需要任何复杂配置文件。
 
 ### 结果的可审计性
 

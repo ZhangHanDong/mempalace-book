@@ -233,7 +233,7 @@ easier to write. The team unanimously agreed to adopt Clerk
 at the January 15 meeting."
 ```
 
-The timeline provides the overview, the knowledge graph's `source_closet` links can trace back to original conversation records, and the palace structure's semantic search can provide full context. The three systems work in concert, forming an information retrieval chain from "panorama" to "close-up."
+The timeline provides the overview, and the palace structure's semantic search can provide fuller context. In the design vocabulary, `source_closet` is the field that can tie those layers together; in the current public repository, it is safer to read that as a provenance hook than as a guarantee that every timeline fact already comes with a fully populated closet-to-verbatim trace.
 
 ### Comparison with Traditional Onboarding
 

@@ -6,7 +6,7 @@
 
 ## Same Room, Different Wings
 
-The previous chapter described how Wing, Hall, and Room progressively narrow the search space. But these hierarchical structures have an inherent side effect: they tend to create silos. If all searches are confined to a single Wing, you can never discover the connection between "Kai's experience with the auth migration" and "the Driftwood project's auth migration decision" --- because they belong to different Wings.
+The previous chapter described how Wing, Hall, and Room progressively narrow the search space at the concept level. But these hierarchical structures have an inherent side effect: they tend to create silos. If all searches are confined to a single Wing, you can never discover the connection between "Kai's experience with the auth migration" and "the Driftwood project's auth migration decision" --- because they belong to different Wings.
 
 MemPalace solves this problem with an extraordinarily simple mechanism: **Tunnels.**
 
@@ -56,7 +56,7 @@ Same topic (auth migration), three perspectives (implementer, project, decision-
 
 The tunnel implementation relies on the `build_graph()` function in `palace_graph.py`. This function is the core of the entire tunnel mechanism, and its design embodies a key engineering insight: **no additional graph database is needed.**
 
-`build_graph()` works by iterating over all document metadata in ChromaDB, extracting Room, Wing, and Hall information, then constructing a graph in memory. The code:
+`build_graph()` works by iterating over all document metadata in ChromaDB, extracting Room, Wing, and whatever Hall metadata happens to exist, then constructing a graph in memory. The code:
 
 ```python
 room_data = defaultdict(lambda: {
@@ -104,7 +104,7 @@ for room, data in room_data.items():
 
 This code's logic warrants close examination. For each Room spanning two or more Wings, the function generates edges for all pairwise Wing combinations. If a Room appears in 3 Wings, it generates 3 edges (A-B, A-C, B-C). Each edge is also associated with all Halls that Room belongs to, along with the Room's memory count --- this count is later used as a sorting weight during graph traversal.
 
-**Zero additional storage cost.** This is the most noteworthy aspect of the design. The graph is not stored in ChromaDB or in any external database. It is dynamically constructed from ChromaDB's metadata each time it is needed. The metadata itself (`wing`, `room`, `hall` fields) is classification information that every memory must have --- this information needs to exist regardless of whether the graph feature exists. The graph **emerges** from this pre-existing metadata, requiring no additional data writes.
+**Zero additional storage cost.** This is the most noteworthy aspect of the design. The graph is not stored in ChromaDB or in any external database. It is dynamically constructed from ChromaDB's metadata each time it is needed. The important caveat is that the current main write paths reliably populate `wing` and `room`, while `hall` is a richer optional metadata layer rather than a guaranteed field on every stored memory. So the graph always has a room-and-wing backbone, and Hall becomes an enhancement when that metadata is present.
 
 The trade-off of this design is obvious: every query requires rebuilding the graph. At the scale of 22,000 memories, `build_graph()` needs to read all metadata in batches (1,000 per batch), meaning at least 22 ChromaDB calls. For real-time interactive scenarios, this may introduce perceptible latency. But MemPalace's choice is to accept this latency in exchange for zero additional storage and zero data consistency maintenance cost.
 

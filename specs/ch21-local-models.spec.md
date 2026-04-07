@@ -7,8 +7,8 @@ estimate: 0.5d
 ## Intent
 
 分析 MemPalace 如何与本地模型（Llama、Mistral 等）集成。
-wake-up 输出 ~170 token 上下文。Python API 按需查询。
-整个栈离线运行的完整路径。
+wake-up 在当前实现中输出 ~600-900 token 的 L0 + L1 上下文，并说明 README 中 ~170 token 是 AAAK 化后的目标路径。Python API 按需查询。
+整个栈在完成本地依赖与默认嵌入资产准备后的离线路径。
 
 ## Decisions
 

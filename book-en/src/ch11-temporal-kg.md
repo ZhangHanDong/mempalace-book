@@ -94,7 +94,7 @@ This is the core of the temporal KG. Beyond the standard `subject`/`predicate`/`
 
 **`confidence`** -- confidence level, defaulting to 1.0 (fully certain). This field leaves room for future probabilistic reasoning. When a fact comes from a less reliable source (such as a relationship inferred from casual conversation), the confidence can be set below 1.0.
 
-**`source_closet`** -- points to a closet in the memory palace. This is the bridge between the knowledge graph and the palace structure: every triple can be traced back to which closet it came from, and thus back to the original verbatim memory. When you question "what is the basis for this fact?", the system can take you back to the original conversation text.
+**`source_closet`** -- an optional provenance field pointing to a closet-like location in the palace model. It represents the intended bridge between the knowledge graph and the palace structure: a triple can record where it came from so later tooling can trace back toward the original memory. In the current public repository, the field exists in the schema and APIs, but it should not be read as evidence that every triple is automatically populated with a complete closet-to-verbatim provenance chain.
 
 **`source_file`** -- the original file path. Lower-level provenance information than `source_closet`.
 

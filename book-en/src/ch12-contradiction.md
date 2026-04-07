@@ -159,9 +159,9 @@ Confidence is not the decision criterion for contradiction detection -- the syst
 
 ### The Provenance Value of source_closet
 
-When a contradiction is detected, the `source_closet` field (`knowledge_graph.py:74`) provides provenance capability. The system can not only tell you "Maya was assigned to auth migration" but also tell you which closet this information came from -- meaning it can be traced back to the original conversation record or document.
+When a contradiction is detected, the `source_closet` field (`knowledge_graph.py:74`) offers a provenance slot. In the design, that means the system can record not only "Maya was assigned to auth migration" but also where that information came from in the palace model.
 
-This provenance capability demonstrates the collaboration between MemPalace's palace structure and knowledge graph. The knowledge graph handles fast structured queries ("who was assigned to this task"), while the palace structure handles deep contextual retrieval ("what did the original conversation say"). The two are connected through the `source_closet` field.
+The important implementation boundary is that `source_closet` is currently best understood as an optional tracing field exposed by the schema and APIs, not as proof that the public repository already auto-populates a complete provenance chain for every contradiction. The knowledge graph can represent the connection; the fully automated extraction-and-linking pipeline is still a stronger claim than the current code supports.
 
 ---
 

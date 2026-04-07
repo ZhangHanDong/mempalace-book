@@ -59,7 +59,7 @@ graph TB
 
 ## mempalace_status：一个工具调用，三重载荷
 
-在 19 个工具中，`mempalace_status` 的地位是特殊的。它不仅返回数据——它教会 AI 两样东西：一种语言（AAAK）和一套行为协议（记忆协议）。
+在 19 个工具中，`mempalace_status` 的地位是特殊的。更准确地说，**当 palace collection 已经存在时**，它不仅返回数据——它还会教会 AI 两样东西：一种语言（AAAK）和一套行为协议（记忆协议）。
 
 看 `mcp_server.py:63-86` 中 `tool_status` 的返回结构：
 
@@ -82,7 +82,7 @@ def tool_status():
     }
 ```
 
-前四个字段是常规状态数据——抽屉总数、wing 分布、room 分布、存储路径。后两个字段是关键：`protocol` 和 `aaak_dialect`。
+前四个字段是常规状态数据——抽屉总数、wing 分布、room 分布、存储路径。后两个字段是关键：`protocol` 和 `aaak_dialect`。但源码里的条件分支也提醒我们一个边界：如果 collection 还不存在，`tool_status()` 会直接返回 `_no_palace()`，也就是错误、路径和初始化提示，而不会携带这两段教学文本。
 
 **第一重载荷：宫殿概览。** `total_drawers`、`wings`、`rooms` 告诉 AI "你的记忆有多大、分成几块、每块有什么"。这是空间感知——AI 看到这些数字后，知道在 `wing_user` 里搜索个人偏好，在 `wing_code` 里搜索技术决策。
 
@@ -102,7 +102,7 @@ def tool_status():
 
 **第三重载荷：AAAK 方言规范。** `AAAK_SPEC` 定义在 `mcp_server.py:102-119`，是一份完整的压缩语言规范。它教会 AI 三样东西：实体编码（`ALC=Alice, JOR=Jordan`）、情绪标记（`*warm*=joy, *fierce*=determined`）、和结构语法（管道分隔、星级评分、hall/wing/room 命名法）。
 
-为什么把语言规范嵌入 status 响应，而不是单独放一个工具？因为 MCP 的调用时机。AI 第一次连接宫殿时，最自然的动作就是调用 `status`——"看看这里有什么"。如果 AAAK 规范在另一个工具里，AI 需要两次调用才能完成初始化。把它塞进 status，一次调用完成三件事：了解宫殿结构、学会行为协议、掌握压缩语言。
+为什么把语言规范嵌入 status 响应，而不是单独放一个工具？因为 MCP 的调用时机。AI 在进入一个**已经存在的**宫殿时，最自然的动作就是调用 `status`——"看看这里有什么"。如果 AAAK 规范在另一个工具里，AI 需要两次调用才能完成初始化。把它塞进 status，在 palace 已就绪的常见路径里，一次调用就能完成三件事：了解宫殿结构、学会行为协议、掌握压缩语言。
 
 这个设计的底层哲学是：**API 不仅传递数据，还传递行为模式。** 传统 API 假设调用者已经知道如何使用数据。但当调用者是一个没有持久记忆的 LLM 时，API 必须在每次会话中重新教育调用者。`mempalace_status` 的三重载荷正是为此设计的。
 

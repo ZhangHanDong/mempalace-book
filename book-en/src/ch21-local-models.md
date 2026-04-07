@@ -1,6 +1,6 @@
 # Chapter 21: Local Model Integration
 
-> **Positioning**: This chapter explains how MemPalace runs in a completely offline environment -- from ChromaDB to local models to AAAK compression -- and why the entire stack was designed from day one with "no network required" as a hard constraint rather than an optional feature.
+> **Positioning**: This chapter explains how MemPalace can run for long periods in an offline environment once local dependencies and default embedding assets are prepared -- from ChromaDB to local models to AAAK compression -- and why the entire stack was designed from day one with "no continuous network requirement" as a hard constraint rather than an optional feature.
 
 ---
 
@@ -8,7 +8,7 @@
 
 Most AI memory systems treat offline support as a degraded mode: the cloud version offers full functionality, while local operation trades away some features, some performance, and some fees. Mem0's core is a cloud API, with self-hosting available only as an enterprise option. Zep's knowledge graph runs on Neo4j, which can be set up locally but is recommended for cloud instances.
 
-MemPalace's design direction is the complete opposite: **local is the only mode, cloud is the optional enhancement.** ChromaDB is an embedded vector database with data stored on the local filesystem. The knowledge graph uses SQLite, also a local file. AAAK compression is pure string manipulation, dependent on no external service. The MCP server runs over the stdio channel, involving no network. The entire stack can run on a disconnected laptop from the first line of code.
+MemPalace's design direction is the complete opposite: **the main path is local, and cloud enhancement is a side path.** ChromaDB is an embedded vector database with data stored on the local filesystem. The knowledge graph uses SQLite, also a local file. AAAK compression is pure string manipulation, dependent on no external service. The MCP server runs over the stdio channel, involving no network. More precisely: once local dependencies and default embedding assets are prepared, you can store, search, wake up, and query the knowledge graph on a disconnected laptop; only benchmark paths like Haiku / Sonnet rerank add a cloud model.
 
 This design isn't technical purism. It stems from a judgment about the nature of memory data: **personal memory is one of the most sensitive data types, and it should not require users to trust any third party.** Your technical decisions, team dynamics, personal preferences, project progress -- the aggregate of this information is more sensitive than any single document because it paints a complete portrait of your work. Hosting this portrait on someone else's server requires a very strong reason. And "convenience" is not a strong enough reason.
 
@@ -52,9 +52,9 @@ mempalace wake-up --wing driftwood > context.txt
 
 The internal logic of `MemoryStack.wake_up()` (`layers.py:380-399`) has two steps. Step one loads L0: reads `~/.mempalace/identity.txt` -- a user-written plain text file defining the AI's identity. Step two generates L1: pulls the 15 most important memories from ChromaDB (sorted by importance), groups them by room, truncates to a 3200-character limit, and formats them into compact text blocks.
 
-The output is approximately 170 tokens. This number isn't a coincidence. It's designed to fit into any model's system prompt without occupying significant context space -- even for a model with a 4K context, 170 tokens is only 4%.
+By the current source baseline, that output is typically **~600-900 tokens**, and the CLI estimates it with a simple `len(text) // 4` heuristic before printing. The `~170 token` number that appears in the README describes a more aggressive later path: rewrite L1 into AAAK and then use that smaller representation for wake-up. In other words, "usable with local models" and "wake-up is only 170 tokens" are two different claims; the former is already true, the latter is not yet the default command path.
 
-Why the name "wake-up" instead of "load-context" or "get-summary"? Because the semantics of this operation aren't "fetch data" but "wake up an agent with memory." When the local model loads these 170 tokens, it transforms from a generic model that knows nothing about the user into a personal assistant that knows who the user is, what projects they're working on, and what they care about. This is identity injection, not data transfer.
+Why the name "wake-up" instead of "load-context" or "get-summary"? Because the semantics of this operation aren't "fetch data" but "wake up an agent with memory." When the local model loads this L0 + L1 text, it transforms from a generic model that knows nothing about the user into a personal assistant that knows who the user is, what projects they're working on, and what they care about. This is identity injection, not data transfer.
 
 ---
 
@@ -118,11 +118,11 @@ Note that `search_memories` and the MCP server's `tool_search` actually call the
 
 ---
 
-## Anatomy of a Complete Offline Stack
+## Anatomy of an Offline-Capable Stack
 
-Putting all components together, here's what a fully offline MemPalace stack looks like:
+Putting all components together, here's what an offline-capable MemPalace stack looks like after cold-start preparation:
 
-**Storage layer: ChromaDB (embedded) + SQLite.** ChromaDB stores vector embeddings and documents on the local filesystem, defaulting to `~/.mempalace/palace`. It comes with its own embedding model -- ChromaDB uses all-MiniLM-L6-v2 (an 80MB sentence transformer) as the default embedder, automatically downloaded on first use and running completely offline thereafter. The knowledge graph uses SQLite, stored at `~/.mempalace/knowledge_graph.sqlite3`. Both databases combined have minimal disk requirements -- a palace with 22,000 memories, including all data and indexes, is approximately 200-300MB.
+**Storage layer: ChromaDB (embedded) + SQLite.** ChromaDB stores vector embeddings and documents on the local filesystem, defaulting to `~/.mempalace/palace`. What the repository directly proves is that MemPalace does not configure an external embedding service by default; it relies on ChromaDB's local embedding path. After that initial asset-preparation step, the path can keep running offline. The knowledge graph uses SQLite, stored at `~/.mempalace/knowledge_graph.sqlite3`. Both databases combined have minimal disk requirements -- a palace with 22,000 memories, including all data and indexes, is approximately 200-300MB.
 
 **Compression layer: AAAK dialect.** Purely rule-driven text compression, dependent on no model. Entity names are replaced with three-letter codes, structured into pipe-delimited format, emotions marked with asterisks. A 30x compression ratio means 3000 tokens of natural language memory can be compressed to 100 tokens. This is especially important for local models with small context windows -- a 4K context model, after deducting system prompt and user input, may only have 2K tokens left for memory. AAAK lets those 2K tokens hold what would otherwise require 60K tokens.
 
@@ -142,7 +142,7 @@ Under the MCP path, AI accesses memory through tool calls -- structured input pa
 
 This appears to be a downgrade -- from a structured API to string copy-paste. But in reality, text is the most universally compatible interface format. JSON APIs require the consumer to understand the schema. Tool calls require the consumer to implement the MCP protocol. Text only requires the consumer to be able to read.
 
-The deeper significance of this choice is: it doesn't require local models to have any "special capabilities." No function calling support needed, no tool use training needed, no JSON mode needed. A 7B model that's only been through basic text generation training can access user memory by pasting 170 tokens of wake-up text into the system prompt. The barrier to entry is zero.
+The deeper significance of this choice is: it doesn't require local models to have any "special capabilities." No function calling support needed, no tool use training needed, no JSON mode needed. A 7B model that's only been through basic text generation training can consume the current wake-up text directly. Today that usually costs about 600-900 tokens; if the AAAK wake-up path lands later, the barrier falls further.
 
 ### Decision Two: AAAK Is a Plain Text Protocol, Not an Encoding Format
 
@@ -160,7 +160,7 @@ This is the foundational assumption that makes the entire local stack viable. If
 
 The wake-up path and the Python API path aren't alternatives but complements. They serve different use cases.
 
-**The wake-up path suits interactive use.** The user sits at the terminal, starts a new conversation, runs `mempalace wake-up`, pastes the output into the model's context, then begins the conversation. The entire process takes 10 seconds with an additional 170 tokens consumed. Suitable for everyday Q&A, brainstorming, and code review. Its advantage is zero integration cost -- no code to write, no configuration to change, no pipeline to build.
+**The wake-up path suits interactive use.** The user sits at the terminal, starts a new conversation, runs `mempalace wake-up`, pastes the output into the model's context, then begins the conversation. The entire process takes about 10 seconds, with an additional 600-900 tokens consumed under the current implementation. Suitable for everyday Q&A, brainstorming, and code review. Its advantage is zero integration cost -- no code to write, no configuration to change, no pipeline to build. The README's lighter `~170 token` number belongs to the next optimization stage of the same workflow.
 
 **The Python API path suits automated pipelines.** A developer builds a custom agent framework -- perhaps a LangChain-based workflow, a custom CLI tool, or an IDE plugin -- using `search_memories` to automatically retrieve relevant memories before each conversation and inject them into the prompt. Additional token consumption depends on the number and length of search results, typically 500-2000 tokens. Suitable for scenarios requiring deep memory integration -- project retrospectives, decision tracing, knowledge base queries.
 

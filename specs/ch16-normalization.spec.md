@@ -52,3 +52,4 @@ Scenario: 源码引用
   Given 第 16 章内容
   When 检查源码引用
   Then 引用 normalize.py 的核心检测函数
+  And 不把 Slack 3+ 人对话的真实说话人身份保留写成完全无损
