@@ -12,7 +12,7 @@ build-dir = "book"
 [output.html]
 default-theme = "light"
 preferred-dark-theme = "ayu"
-additional-js = ["mermaid.min.js", "mermaid-init.js", "language-switcher.js"]
+additional-js = ["language-switcher.js", "mermaid.min.js", "mermaid-init.js"]
 additional-css = ["language-switcher.css"]
 site-url = "/mempalace-book/en/"
 
