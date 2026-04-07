@@ -57,4 +57,7 @@
 
 ## 附录
 
+- [附录 A：E2E Trace — 从 mempalace init 到第一次搜索](appendix-e2e-init.md)
+- [附录 B：E2E Trace — MCP 工具调用的完整生命周期](appendix-e2e-mcp.md)
 - [附录 C：AAAK 方言完整参考](appendix-aaak-spec.md)
+- [附录 D：真实性与可信度评估](appendix-credibility-assessment.md)
