@@ -54,3 +54,7 @@
 
 - [Chapter 24: Local-First Is Not a Compromise](ch24-local-first.md)
 - [Chapter 25: Beyond Conversations](ch25-beyond-conversations.md)
+
+## Appendices
+
+- [Appendix C: AAAK Dialect Complete Reference](appendix-aaak-spec.md)

@@ -54,3 +54,7 @@
 
 - [第 24 章：本地优先不是妥协](ch24-local-first.md)
 - [第 25 章：超越对话](ch25-beyond-conversations.md)
+
+## 附录
+
+- [附录 C：AAAK 方言完整参考](appendix-aaak-spec.md)
