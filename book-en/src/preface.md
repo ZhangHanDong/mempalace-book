@@ -10,6 +10,11 @@ In early 2026, this tweet sent a modest shockwave through the tech community. Th
 
 Ben Sigman, a UCLA Classics degree, over twenty years of systems engineering experience, CEO of Bitcoin Libre, a tech entrepreneur who had spent years deep in decentralized lending markets, and also the author of *Bitcoin One Million*. Milla Jovovich --- yes, that Milla Jovovich, the Hollywood actress with five million Instagram followers, whose GitHub bio reads "architect of the MemPalace."
 
+<div align="center">
+<img src="assets/milla-fifth-element.jpeg" alt="Milla Jovovich" width="480">
+<br><sub>Milla Jovovich — from The Fifth Element to the architect of MemPalace.</sub>
+</div>
+
 A classically trained systems engineer, a Hollywood actress, and a system they spent months building with Claude, beating every commercial product and academic system.
 
 This fact alone warrants serious examination.
