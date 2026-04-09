@@ -27,6 +27,24 @@ MemPalace 是一个开源 AI 记忆系统，由 [Ben Sigman](https://x.com/bensi
 ## Read Online
 
 ```bash
+./serve.sh
+```
+
+脚本会自动：
+- 检测 3000 / 3001 端口是否被占用，冲突时自动递增端口
+- 同时启动中文版和英文版，服务就绪后自动打开浏览器
+- 打印清晰的启动日志，Ctrl+C 停止全部服务
+
+也可手动指定起始端口：
+
+```bash
+./serve.sh 4000 4001   # 中文版 4000，英文版 4001
+```
+
+<details>
+<summary>不使用脚本，手动启动</summary>
+
+```bash
 # 中文版
 mdbook serve book
 # open http://localhost:3000
@@ -35,6 +53,8 @@ mdbook serve book
 mdbook serve book-en -p 3001
 # open http://localhost:3001
 ```
+
+</details>
 
 ## Structure
 
