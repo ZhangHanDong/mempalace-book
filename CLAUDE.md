@@ -18,7 +18,10 @@ docs/book-outline.md  # 全书大纲
 
 - **大纲**: `docs/book-outline.md` — 全书 9 部分 25 章的结构和每章核心论点
 - **章节 Specs**: `specs/chNN-*.spec.md` — 每章的 intent、decisions、boundaries、completion criteria
-- **MemPalace 源码**: `~/Work/Projects/AI/mempalace/mempalace/` — 书中分析的源码
+- **MemPalace 源码**: `~/Work/Projects/AI/mempalace/mempalace/` — 书中分析的 Python 源码
+- **mempal 源码**: `~/Work/Projects/AI/mempal/` — Part 10 引用的 Rust 重铸版
+- **mempal 设计文档**: `~/Work/Projects/AI/mempal/docs/specs/2026-04-08-mempal-design.md`
+- **mempal 记忆**: 通过 `mempal_search` MCP 工具查询开发决策（drawer_id 可引用）
 
 ## Writing Rules
 
@@ -43,4 +46,6 @@ mdbook serve book-en -p 3001  # 英文版 localhost:3001
 1. 读对应的 spec：`specs/chNN-*.spec.md`
 2. 确认修改不违反 spec 的 Boundaries
 3. 如果修改涉及源码引用，先验证行号：读 `~/Work/Projects/AI/mempalace/mempalace/` 下对应文件
-4. 修改中文版后同步更新英文版
+4. Part 10 章节引用 mempal 源码：读 `~/Work/Projects/AI/mempal/crates/` 下对应文件
+5. Part 10 章节引用开发决策：通过 `mempal_search` 查询，引用 drawer_id
+6. 修改中文版后同步更新英文版

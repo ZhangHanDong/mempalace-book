@@ -55,6 +55,13 @@
 - [Chapter 24: Local-First Is Not a Compromise](ch24-local-first.md)
 - [Chapter 25: Beyond Conversations](ch25-beyond-conversations.md)
 
+## Part 10: mempal — Reforging Memory in Rust
+
+- [Chapter 26: Why Rewrite in Rust](ch26-why-rewrite-in-rust.md)
+- [Chapter 27: What Stayed, What Changed](ch27-what-stayed-what-changed.md)
+- [Chapter 28: Self-Describing Protocol](ch28-self-describing-protocol.md)
+- [Chapter 29: Multi-Agent Coordination](ch29-multi-agent-coordination.md)
+
 ## Appendices
 
 - [Appendix A: E2E Trace — From mempalace init to First Search](appendix-e2e-init.md)

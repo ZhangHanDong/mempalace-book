@@ -55,6 +55,13 @@
 - [第 24 章：本地优先不是妥协](ch24-local-first.md)
 - [第 25 章：超越对话](ch25-beyond-conversations.md)
 
+## 第十部分：mempal——用 Rust 重铸记忆
+
+- [第 26 章：为什么用 Rust 重铸](ch26-why-rewrite-in-rust.md)
+- [第 27 章：保留了什么、改变了什么](ch27-what-stayed-what-changed.md)
+- [第 28 章：自描述协议](ch28-self-describing-protocol.md)
+- [第 29 章：多 Agent 协作](ch29-multi-agent-coordination.md)
+
 ## 附录
 
 - [附录 A：E2E Trace — 从 mempalace init 到第一次搜索](appendix-e2e-init.md)
