@@ -61,6 +61,7 @@
 - [Chapter 27: What Stayed, What Changed](ch27-what-stayed-what-changed.md)
 - [Chapter 28: Self-Describing Protocol](ch28-self-describing-protocol.md)
 - [Chapter 29: Multi-Agent Coordination](ch29-multi-agent-coordination.md)
+- [Chapter 30: The Honest Gap](ch30-honest-gap.md)
 
 ## Appendices
 

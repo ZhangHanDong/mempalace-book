@@ -61,6 +61,7 @@
 - [第 27 章：保留了什么、改变了什么](ch27-what-stayed-what-changed.md)
 - [第 28 章：自描述协议](ch28-self-describing-protocol.md)
 - [第 29 章：多 Agent 协作](ch29-multi-agent-coordination.md)
+- [第 30 章：诚实的差距](ch30-honest-gap.md)
 
 ## 附录
 

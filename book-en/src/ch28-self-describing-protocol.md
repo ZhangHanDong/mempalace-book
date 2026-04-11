@@ -209,6 +209,48 @@ This principle has a limitation: it only works when the consumers are AI agents 
 
 ---
 
+## Agent Session Lifecycle
+
+Putting all the pieces together — protocol, tools, and search — here is how a typical agent session flows:
+
+```mermaid
+sequenceDiagram
+    participant A as AI Agent
+    participant M as mempal MCP
+    participant DB as palace.db
+
+    Note over A,M: Connection (automatic)
+    M->>A: initialize.instructions = MEMORY_PROTOCOL
+    Note over A: Agent learns 9 rules
+
+    Note over A,M: Rule 0: First-Time Setup
+    A->>M: mempal_status()
+    M->>DB: scopes, counts
+    DB-->>M: wings=[mempal], drawers=120
+    M-->>A: status + protocol + AAAK spec
+
+    Note over A,M: Rule 3: Query When Uncertain
+    A->>M: mempal_search("auth decision")
+    M->>DB: BM25(FTS5) + Vector(sqlite-vec)
+    DB-->>M: RRF merged results + tunnel hints
+    M-->>A: [{drawer_id, content, source_file, tunnel_hints}]
+
+    Note over A,M: Rule 4: Save After Decision
+    A->>M: mempal_ingest({content, wing, importance:4})
+    M->>DB: dedup check → insert drawer + vector + FTS
+    DB-->>M: drawer_id (+ duplicate_warning if similar)
+    M-->>A: {drawer_id}
+
+    Note over A,M: Rule 5a: Keep a Diary (optional)
+    A->>M: mempal_ingest({wing:"agent-diary", room:"claude"})
+    M->>DB: insert behavioral observation
+    M-->>A: {drawer_id}
+```
+
+This lifecycle is entirely self-bootstrapping. The agent receives the protocol at connection time, discovers wings via `mempal_status`, searches with hybrid retrieval, saves decisions with importance ranking, and optionally records behavioral observations in a diary. No external configuration required.
+
+---
+
 ## What This Means for Tool Design
 
 mempal's self-describing protocol is a specific instance of a broader design question: how should tools teach their users?

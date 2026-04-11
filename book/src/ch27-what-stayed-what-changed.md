@@ -213,6 +213,65 @@ mempal 的设计文档（`docs/specs/2026-04-08-mempal-design.md`）在两张表
 
 ---
 
+## mempal 架构总览
+
+以下是完整的系统架构图，展示了所有变更维度之后的数据流：
+
+```mermaid
+graph TD
+    subgraph "Interfaces"
+        CLI["CLI<br/>init/ingest/search/kg/tunnels"]
+        MCP["MCP Server<br/>7 tools + MEMORY_PROTOCOL"]
+        REST["REST API<br/>(feature-gated)"]
+    end
+
+    subgraph "Search Layer"
+        BM25["BM25<br/>FTS5"]
+        VEC["Vector<br/>sqlite-vec"]
+        RRF["RRF Fusion<br/>k=60"]
+        ROUTE["Taxonomy<br/>Router"]
+        TUNNEL["Tunnel<br/>Hints"]
+        BM25 --> RRF
+        VEC --> RRF
+        ROUTE --> RRF
+        RRF --> TUNNEL
+    end
+
+    subgraph "Storage (palace.db)"
+        DRAW["drawers<br/>raw text + wing/room<br/>+ importance + deleted_at"]
+        FTS["drawers_fts<br/>FTS5 index"]
+        DVEC["drawer_vectors<br/>embeddings (dynamic dim)"]
+        TRIP["triples<br/>S-P-O + temporal"]
+        TAX["taxonomy<br/>routing keywords"]
+    end
+
+    subgraph "Embedding"
+        M2V["model2vec<br/>(default, 256d)"]
+        ORT["ONNX MiniLM<br/>(optional, 384d)"]
+        API["External API<br/>(configurable)"]
+    end
+
+    subgraph "Output"
+        AAAK["AAAK Codec<br/>BNF + jieba"]
+        CITE["Citations<br/>drawer_id + source_file"]
+    end
+
+    CLI --> DRAW
+    MCP --> DRAW
+    REST --> DRAW
+    DRAW --> FTS
+    DRAW --> DVEC
+    M2V --> DVEC
+    ORT -.-> DVEC
+    API -.-> DVEC
+    DRAW --> AAAK
+    RRF --> CITE
+```
+
+这张图展示了完整的数据流：内容通过任一接口（CLI、MCP、REST）进入，以原始文本、FTS5 索引和向量嵌入的形式存入 SQLite。搜索通过 RRF 融合合并 BM25 和向量两条路径，经 taxonomy 路由过滤，附加 tunnel 提示。输出可以是原始文本或 AAAK 压缩格式，始终带有引用。
+
+---
+
 ## 这次对比揭示了什么
 
 五个维度呈现出一致的模式：mempal 保留了 MemPalace 的设计理念，同时简化或完善了它们的实现。

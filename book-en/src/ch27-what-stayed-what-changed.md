@@ -213,6 +213,65 @@ Every row in this table traces back to a finding in the book's first 25 chapters
 
 ---
 
+## mempal Architecture Overview
+
+The complete system, as it stands after all dimensions of change:
+
+```mermaid
+graph TD
+    subgraph "Interfaces"
+        CLI["CLI<br/>init/ingest/search/kg/tunnels"]
+        MCP["MCP Server<br/>7 tools + MEMORY_PROTOCOL"]
+        REST["REST API<br/>(feature-gated)"]
+    end
+
+    subgraph "Search Layer"
+        BM25["BM25<br/>FTS5"]
+        VEC["Vector<br/>sqlite-vec"]
+        RRF["RRF Fusion<br/>k=60"]
+        ROUTE["Taxonomy<br/>Router"]
+        TUNNEL["Tunnel<br/>Hints"]
+        BM25 --> RRF
+        VEC --> RRF
+        ROUTE --> RRF
+        RRF --> TUNNEL
+    end
+
+    subgraph "Storage (palace.db)"
+        DRAW["drawers<br/>raw text + wing/room<br/>+ importance + deleted_at"]
+        FTS["drawers_fts<br/>FTS5 index"]
+        DVEC["drawer_vectors<br/>embeddings (dynamic dim)"]
+        TRIP["triples<br/>S-P-O + temporal"]
+        TAX["taxonomy<br/>routing keywords"]
+    end
+
+    subgraph "Embedding"
+        M2V["model2vec<br/>(default, 256d)"]
+        ORT["ONNX MiniLM<br/>(optional, 384d)"]
+        API["External API<br/>(configurable)"]
+    end
+
+    subgraph "Output"
+        AAAK["AAAK Codec<br/>BNF + jieba"]
+        CITE["Citations<br/>drawer_id + source_file"]
+    end
+
+    CLI --> DRAW
+    MCP --> DRAW
+    REST --> DRAW
+    DRAW --> FTS
+    DRAW --> DVEC
+    M2V --> DVEC
+    ORT -.-> DVEC
+    API -.-> DVEC
+    DRAW --> AAAK
+    RRF --> CITE
+```
+
+This diagram shows the full data flow: content enters through any interface (CLI, MCP, REST), is stored in SQLite with raw text, FTS5 index, and vector embeddings. Search combines BM25 and vector paths through RRF fusion, filtered by taxonomy routing, with tunnel hints attached. Output can be raw or AAAK-compressed, always with citations.
+
+---
+
 ## What This Comparison Reveals
 
 The pattern across all five dimensions is consistent: mempal preserves MemPalace's design ideas while simplifying or completing their implementation.
