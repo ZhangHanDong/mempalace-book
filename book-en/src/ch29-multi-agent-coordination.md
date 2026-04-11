@@ -146,6 +146,24 @@ mempal uses itself to remember its own development decisions. This section evalu
 
 ---
 
+## Agent Diary: Behavioral Learning Across Sessions
+
+The dogfooding experience led to a structured approach for recording behavioral observations: the **agent diary**. MEMORY_PROTOCOL Rule 5a tells agents to write diary entries to `wing="agent-diary"` with `room` set to the agent's name, using standardized prefixes:
+
+- **OBSERVATION**: factual behavioral patterns ("Claude forgets to save decisions after commits")
+- **LESSON**: actionable takeaways ("FTS5 BM25 was the highest-value improvement")
+- **PATTERN**: recurring cross-session behaviors ("Codex reads docs first, Claude generates first")
+
+The diary is not a separate feature — it uses the same `mempal_ingest` tool with a wing/room convention. But the structured prefixes make diary entries searchable by type:
+
+```bash
+mempal search "lesson" --wing agent-diary --room claude
+```
+
+Combined with Claude Code's auto-dream feature (which consolidates session memory between sessions), the diary creates a feedback loop: agents observe their own behavior → record patterns → future sessions read the diary → adjust behavior. This is the closest thing to "learning from experience" that a stateless LLM can achieve — not by changing weights, but by accumulating searchable observations in shared memory.
+
+---
+
 ## What This Pattern Suggests
 
 The Claude↔Codex relay via mempal drawers is a specific instance of a general pattern: **asynchronous coordination through shared memory.**

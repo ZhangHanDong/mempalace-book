@@ -146,6 +146,24 @@ mempal 用自己来记忆自身的开发决策。本节诚实评估这一 dogfoo
 
 ---
 
+## Agent 日记：跨 Session 行为学习
+
+Dogfooding 的经验催生了一种结构化记录行为观察的方式：**agent 日记**。MEMORY_PROTOCOL Rule 5a 告诉 agent 将日记写入 `wing="agent-diary"`，`room` 设为 agent 名称，使用标准化前缀：
+
+- **OBSERVATION**：事实性行为观察（"Claude 提交后忘记保存决策"）
+- **LESSON**：可操作的教训（"FTS5 BM25 是本次 session 价值最高的改进"）
+- **PATTERN**：跨 session 的重复行为模式（"Codex 先读文档再写，Claude 先写再验证"）
+
+日记不是独立功能——它使用相同的 `mempal_ingest` 工具加 wing/room 约定。但结构化前缀使日记条目可按类型搜索：
+
+```bash
+mempal search "lesson" --wing agent-diary --room claude
+```
+
+结合 Claude Code 的 auto-dream 功能（在 session 间自动整理记忆），日记形成了一个反馈循环：agent 观察自身行为 → 记录模式 → 未来 session 阅读日记 → 调整行为。这是无状态 LLM 最接近"从经验中学习"的方式——不是改变权重，而是在共享记忆中积累可搜索的观察。
+
+---
+
 ## 这一模式的启示
 
 Claude↔Codex 经由 mempal drawer 的接力是一个通用模式的具体实例：**通过共享记忆实现异步协作。**
