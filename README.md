@@ -24,17 +24,48 @@ MemPalace 是一个开源 AI 记忆系统，由 [Ben Sigman](https://x.com/bensi
 
 本书从第一性原理出发，分析 MemPalace 的每一个设计决策——从古希腊记忆术到向量数据库，从 AAAK 压缩语言到时态知识图谱。每个设计决策都有源码引用、benchmark 数据支撑和权衡分析。
 
-## Read Online
+## Quick Start
+
+**安装 mdbook（仅需一次）：**
 
 ```bash
-# 中文版
-mdbook serve book
-# open http://localhost:3000
-
-# English edition
-mdbook serve book-en -p 3001
-# open http://localhost:3001
+cargo install mdbook
+# 或 brew install mdbook
 ```
+
+**启动阅读：**
+
+```bash
+./serve.sh          # 启动中文版（默认）
+./serve.sh --en     # 启动英文版
+```
+
+脚本会自动打开浏览器。如端口 3000 被占用会自动切换到下一个可用端口。
+
+**停止服务：**
+
+- 运行中按 `Ctrl+C`
+- 或在另一个终端运行 `./serve.sh --shutdown`
+
+<details>
+<summary>更多选项</summary>
+
+| 命令 | 说明 |
+|------|------|
+| `./serve.sh` | 中文版 @ localhost:3000 |
+| `./serve.sh --en` | 英文版 @ localhost:3000 |
+| `./serve.sh -p 4000` | 指定端口 |
+| `./serve.sh --shutdown` | 停止所有 mdbook 进程 |
+| `./serve.sh --help` | 显示帮助 |
+
+**不使用脚本，手动启动：**
+
+```bash
+mdbook serve book            # 中文版 → http://localhost:3000
+mdbook serve book-en -p 3001 # 英文版 → http://localhost:3001
+```
+
+</details>
 
 ## Structure
 
@@ -65,12 +96,6 @@ docs/              大纲和参考文档
 - **Mermaid** — 运行时渲染，暗色主题自适应
 - **Language Switcher** — 工具栏中英切换按钮
 - **agent-spec** — 每章有 BDD 风格的验收标准
-
-## Prerequisites
-
-```bash
-cargo install mdbook
-```
 
 ## Benchmark Transparency
 

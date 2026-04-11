@@ -1,7 +1,6 @@
 [book]
 authors = ["Zhang Alex"]
 language = "en"
-multilingual = false
 src = "src"
 title = "MemPalace: First Principles of AI Memory"
 description = "How to design a memory system when conversations become the carrier of decisions — design analysis based on MemPalace v3.0.0 source code"
