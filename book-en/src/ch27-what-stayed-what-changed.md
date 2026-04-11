@@ -203,8 +203,10 @@ mempal's design document (`docs/specs/2026-04-08-mempal-design.md`) captures the
 | Embedding | ChromaDB built-in | ONNX (MiniLM) via `Embedder` trait | Offline-first, swappable models |
 | AAAK | Heuristic encoder only | BNF grammar + encoder + decoder + round-trip | Fix Appendix C deficiencies |
 | CJK processing | Character bigrams | jieba POS tagging | Word-level vs character-level |
-| Temporal KG | Triples + contradiction + timeline | Schema reserved, logic deferred | Search reliability > temporal features |
-| MCP tools | 19 in 5 groups | 5 tools + self-describing protocol | Ship what works, document it thoroughly |
+| Search | Vector-only (ChromaDB) | **Hybrid: BM25 (FTS5) + vector + RRF fusion** | Exact keyword matching (error codes, function names) that pure vector search misses; inspired by qmd's hybrid approach |
+| Temporal KG | Triples + contradiction + timeline | **Triples activated (manual CRUD)**, contradiction/timeline deferred | Relationship queries vector search cannot answer; v1 manual-only to avoid LLM dependency |
+| Tunnels | Auto cross-Wing links | **Dynamic SQL discovery** | Same concept as MemPalace Ch 6, zero-storage-cost implementation via `GROUP BY room HAVING COUNT(DISTINCT wing) > 1` |
+| MCP tools | 19 in 5 groups | 7 tools + self-describing protocol | Ship what works; `mempal_kg` and `mempal_tunnels` added for KG and cross-Wing discovery |
 | Language | Python | Rust | Single binary, zero runtime deps (Ch 26) |
 
 Every row in this table traces back to a finding in the book's first 25 chapters or appendices. The "rationale" column is not post-hoc justification — it is the analysis that preceded the implementation.

@@ -153,38 +153,43 @@ pub struct SearchRequest {
 
 ---
 
-## 19 个工具到 5 个：少即是多（附带上下文）
+## 19 个工具到 7 个：少即是多（附带上下文）
 
-详见第19章对 MemPalace 按 5 种认知角色组织的 19 个工具的分析。mempal 只有 5 个工具。本节解释为什么精简是可行的——以及它依赖什么条件。
+详见第19章对 MemPalace 按 5 种认知角色组织的 19 个工具的分析。mempal 有 7 个工具。本节解释为什么精简是可行的——以及它依赖什么条件。
 
-### 5 个工具覆盖了什么
+### 7 个工具覆盖了什么
 
-| Tool | Role | Replaces from MemPalace |
+| 工具 | 角色 | 替代 MemPalace 中的 |
 |------|------|------------------------|
-| `mempal_status` | Observe | `status`, `list_wings`, `list_rooms`, `get_aaak_spec` |
-| `mempal_search` | Retrieve | `search`, `check_duplicate` |
-| `mempal_ingest` | Write | `add_drawer` |
-| `mempal_delete` | Write | `delete_drawer` |
-| `mempal_taxonomy` | Configure | `get_taxonomy` (read) + taxonomy edit (new) |
+| `mempal_status` | 观察 | `status`、`list_wings`、`list_rooms`、`get_aaak_spec` |
+| `mempal_search` | 检索 | `search`、`check_duplicate`（混合：BM25 + 向量 + RRF） |
+| `mempal_ingest` | 写入 | `add_drawer`（支持 `dry_run` 预览） |
+| `mempal_delete` | 写入 | `delete_drawer`（soft-delete + 审计） |
+| `mempal_taxonomy` | 配置 | `get_taxonomy`（读）+ taxonomy 编辑（新增） |
+| `mempal_kg` | 知识 | `kg_add`、`kg_query`、`kg_invalidate`（手动三元组 CRUD） |
+| `mempal_tunnels` | 导航 | `find_tunnels`（动态跨 Wing room 发现） |
 
-### 缺失了什么
+### 仍然缺失的
 
-MemPalace 的 8 个工具在 mempal 中没有对应物：
+MemPalace 的 6 个工具在 mempal 中没有对应物：
 
-- **Knowledge Graph 组**（5 个工具：`kg_query`、`kg_add`、`kg_invalidate`、`kg_timeline`、`kg_stats`）：依赖时序 KG，详见第27章的分析——mempal 中 schema 已预留但逻辑延后。
-- **Navigation 组**（3 个工具：`traverse`、`find_tunnels`、`graph_stats`）：需要详见第6章分析的跨域隧道机制。mempal 的两层结构目前未实现隧道。
+- **KG 时间线和统计**（2 个：`kg_timeline`、`kg_stats`）：mempal 的 `mempal_kg` 覆盖了 add/query/invalidate，但不包括时间线叙事生成和图统计。这些依赖更充实的知识图谱。
+- **Navigation 组**（2 个：`traverse`、`graph_stats`）：图遍历需要 drawer 之间更丰富的边结构，超出当前 tunnel 机制的范围。
+- **Diary 组**（2 个：`diary_write`、`diary_read`）：agent 专家日记尚未实现。
 
-这些不是被拒绝，而是被延后——直到它们依赖的子系统达到生产就绪。为未完成的子系统提供工具，只会误导 agent 去调用它们，得到空的或错误的结果。
+这些不是被拒绝，而是被延后——直到它们依赖的子系统达到生产就绪。
 
-### 为什么 5 个就够了
+### 为什么 7 个就够了
 
-5 个工具的表面积之所以可行，源于 MemPalace 所不具备的两个设计决策：
+7 个工具的表面积之所以可行，源于 MemPalace 所不具备的两个设计决策：
 
 **1. 协议弥补了缺失的工具。** MemPalace 需要 `list_wings` 和 `list_rooms` 作为独立工具，因为没有机制告诉 agent 何时使用它们。mempal 的 `mempal_status` 返回 wing/room 数据，*同时*协议告诉 agent（Rule 0）在会话开始时调用它。一个工具取代三个，因为行为上下文已经内嵌。
 
 **2. 自文档化字段减少了单次调用的困惑。** MemPalace 需要 `check_duplicate` 作为独立工具，因为 agent 无法在写入前知道某个 drawer 是否已存在。mempal 的 `mempal_ingest` 在内部处理去重——`drawer_exists()` 在插入前被调用。agent 不需要单独检查。
 
-教训不是"工具越少越好"，而是工具和协议是互补的表面积。当协议承载行为指引时，每个工具可以用更少的认知负担做更多的事。
+**3. 合并工具单次调用做更多事。** MemPalace 将 KG 拆成 5 个独立工具（`kg_query`、`kg_add`、`kg_invalidate`、`kg_timeline`、`kg_stats`）。mempal 的 `mempal_kg` 将 add/query/invalidate 作为单个工具内的 action 处理——agent 传递 `{"action": "query", "subject": "Kai"}` 而不是在 5 个工具间选择。更少的工具，相同的能力面。
+
+教训不是"工具越少越好"，而是工具和协议是互补的表面积。当协议承载行为指引、工具合并相关操作时，每个工具可以用更少的认知负担做更多的事。
 
 ---
 

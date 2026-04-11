@@ -153,38 +153,43 @@ A test in `mcp_test.rs` guards this: `test_mempal_search_schema_warns_about_wing
 
 ---
 
-## 19 Tools to 5: Less Is More (With Context)
+## 19 Tools to 7: Less Is More (With Context)
 
-Chapter 19 documented MemPalace's 19 tools organized into 5 cognitive roles. mempal has 5 tools. This section explains why the reduction works — and what it depends on.
+Chapter 19 documented MemPalace's 19 tools organized into 5 cognitive roles. mempal has 7 tools. This section explains why the reduction works — and what it depends on.
 
-### What 5 Tools Cover
+### What 7 Tools Cover
 
 | Tool | Role | Replaces from MemPalace |
 |------|------|------------------------|
 | `mempal_status` | Observe | `status`, `list_wings`, `list_rooms`, `get_aaak_spec` |
-| `mempal_search` | Retrieve | `search`, `check_duplicate` |
-| `mempal_ingest` | Write | `add_drawer` |
-| `mempal_delete` | Write | `delete_drawer` |
+| `mempal_search` | Retrieve | `search`, `check_duplicate` (hybrid: BM25 + vector + RRF) |
+| `mempal_ingest` | Write | `add_drawer` (supports `dry_run` preview) |
+| `mempal_delete` | Write | `delete_drawer` (soft-delete with audit) |
 | `mempal_taxonomy` | Configure | `get_taxonomy` (read) + taxonomy edit (new) |
+| `mempal_kg` | Knowledge | `kg_add`, `kg_query`, `kg_invalidate` (manual triples CRUD) |
+| `mempal_tunnels` | Navigate | `find_tunnels` (dynamic cross-Wing room discovery) |
 
-### What Is Missing
+### What Is Still Missing
 
-Eight tools from MemPalace's surface have no mempal equivalent:
+Six tools from MemPalace's surface have no mempal equivalent:
 
-- **Knowledge Graph group** (5 tools: `kg_query`, `kg_add`, `kg_invalidate`, `kg_timeline`, `kg_stats`): These depend on the temporal KG, which Chapter 27 explained is schema-reserved but logic-deferred in mempal.
-- **Navigation group** (3 tools: `traverse`, `find_tunnels`, `graph_stats`): These require the cross-domain tunnel mechanism analyzed in Chapter 6. mempal's two-tier structure does not currently implement tunnels.
+- **KG timeline and stats** (2 tools: `kg_timeline`, `kg_stats`): mempal's `mempal_kg` covers add/query/invalidate but not timeline narrative generation or graph statistics. These depend on a more populated knowledge graph.
+- **Navigation group** (2 tools: `traverse`, `graph_stats`): Graph traversal requires richer inter-drawer edges beyond the current tunnel mechanism.
+- **Diary group** (2 tools: `diary_write`, `diary_read`): Agent specialist diaries are not yet implemented.
 
-These are not rejected — they are deferred until the subsystems they depend on are production-ready. Including tools for unfinished subsystems would mislead agents into calling them and receiving empty or incorrect results.
+These are not rejected — they are deferred until the subsystems they depend on are production-ready.
 
-### Why 5 Works
+### Why 7 Works
 
-The 5-tool surface works because of two design decisions that MemPalace did not have:
+The 7-tool surface works because of two design decisions that MemPalace did not have:
 
 **1. The protocol compensates for missing tools.** MemPalace needed `list_wings` and `list_rooms` as separate tools because there was no mechanism to tell agents when to use them. mempal's `mempal_status` returns wing/room data *and* the protocol tells agents (Rule 0) to call it at session start. One tool replaces three because the behavioral context is embedded.
 
 **2. Self-documenting fields reduce per-call confusion.** MemPalace needed `check_duplicate` as a separate tool because agents had no way to know whether a drawer already existed before writing. mempal's `mempal_ingest` handles deduplication internally — `drawer_exists()` is called before insertion. The agent does not need to check separately.
 
-The lesson is not "fewer tools are always better." It is that tools and protocol are complementary surfaces. When the protocol carries behavioral guidance, each tool can do more with less cognitive overhead on the agent's side.
+**3. Consolidated tools do more per call.** MemPalace split KG into 5 separate tools (`kg_query`, `kg_add`, `kg_invalidate`, `kg_timeline`, `kg_stats`). mempal's `mempal_kg` handles add/query/invalidate as actions within a single tool — the agent passes `{"action": "query", "subject": "Kai"}` instead of choosing between 5 tools. Fewer tools, same capability surface.
+
+The lesson is not "fewer tools are always better." It is that tools and protocol are complementary surfaces. When the protocol carries behavioral guidance and tools consolidate related actions, each tool can do more with less cognitive overhead on the agent's side.
 
 ---
 
