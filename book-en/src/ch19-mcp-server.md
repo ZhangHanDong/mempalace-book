@@ -260,3 +260,27 @@ The answer isn't in the number itself. 19 tools are the natural result of the fo
 19 is the minimum complete set of these constraints. Not 18, because that would mean cutting a cognitive capability. Not 20, because there's no 20th need that can't be covered by the first 19.
 
 Every API ultimately encodes a worldview. MemPalace's 19 tools encode the worldview that: AI doesn't just need to store and retrieve memories -- it needs to reason within structured relationships, explore spatial topology, trace along timelines, and reflect in private diaries. These five capabilities together constitute complete memory interaction.
+
+---
+
+## Version Evolution: v3.0.0 → v3.3.0
+
+This chapter is based on the v3.0.0 snapshot of 19 tools. As of v3.3.0, the `TOOLS` dict (`mcp_server.py:1111`) has grown to 29 tools — the 10 additions fall into three groups:
+
+**Tunnel explicit management (4 tools, CRUD + traversal)**: `create_tunnel` / `list_tunnels` / `delete_tunnel` / `follow_tunnels` (`mcp_server.py:1257-1315`) — the first three are CRUD; `follow_tunnels` is read-only traversal. v3.0.0's `find_tunnels` was read-only discovery — the system auto-inferred tunnels from rooms sharing a name. v3.3.0 lets users **explicitly declare** cross-wing links (e.g., manually connecting `architecture` in `wing_myproject` with `papers` in `wing_research`). This doesn't change the navigation group's cognitive role, only extends tunnels from "emergent structure" to "emergent + declared."
+
+**Drawer read/write CRUD (3 tools)**: `get_drawer` / `list_drawers` / `update_drawer` (`mcp_server.py:1394-1449`). v3.0.0's read group could only reach drawer granularity indirectly via `search`; the write group had only `add_drawer` / `delete_drawer`. v3.3.0 filled in the CRUD gaps — fetch by ID, paginated list, in-place update. The chapter's "7 read / 2 write" asymmetry judgment still holds in v3.3.0 (9 read / 3 write), because the new read entries are **granularity changes**, not new cognitive modes.
+
+**Operational tools (3 tools)**: `hook_settings` / `memories_filed_away` / `reconnect` (`mcp_server.py:1490-1527`). Strictly speaking these don't belong to the original five cognitive-role groups — they are the **system self-inspection surface** exposed to the AI: hook silent toggle, checkpoint status query, forced reconnect. `reconnect`'s description candidly states its purpose: "external scripts or CLI commands that modified the palace directly can leave the in-memory HNSW index stale." The chapter's "five cognitive roles" argument is an application-layer model; operational tools belong to a different dimension and don't break the original grouping — but they do reveal one thing: **when MCP becomes the sole interaction channel between the AI and the system, the system's own operations must also be exposed as tools**.
+
+### Revised judgments
+
+- **"19 is the minimum complete set"** → adjusted to "19 is the minimum complete set **at the cognitive-role level**." v3.3.0's additions are mainly in CRUD granularity and operational dimensions, not in cognitive roles.
+- **"Read-to-write 7:2 asymmetry"** → 9:3 in v3.3.0; the asymmetry remains.
+- **`mempalace_status` triple payload** → unchanged; still the AI's only teaching entry point when arriving at a palace.
+- **Part 10 analyzes mempal (Rust reforge) trimming tools to 5-7** (Chapter 27 states 5, Chapter 28 states 7) → the comparison base shifts from 19→5-7 to 29→5-7 in v3.3.0, making the trimming more dramatic, not less. Part 10's trimming argument gets stronger, not weaker.
+
+### Fixes that don't change tool count
+
+- `#807` set `hnsw:space=cosine` metadata on all collection creation sites — v3.0.0's similarity scoring under ChromaDB's default L2 was broken. The "0.9 cosine threshold for dedup" mentioned in this chapter was actually running under L2 in v3.0.0; cosine only truly landed in v3.3.0.
+- `add_drawer`'s drawer ID generation (v3.0.0: first 100 chars of content + timestamp MD5, first 16 chars) changed in v3.3.0 to full content hash (`#716`) — stable re-mine, avoids duplicate ingestion producing new IDs.

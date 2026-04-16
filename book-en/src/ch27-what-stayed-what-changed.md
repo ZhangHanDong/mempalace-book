@@ -174,7 +174,7 @@ Appendix D's observation applies here: it is better to ship what works than to n
 
 ### What MemPalace Does
 
-Chapter 19 documented 19 MCP tools in 5 cognitive groups. The design is intellectually coherent — each group maps to a role the AI plays when interacting with memory.
+Chapter 19 documented 19 MCP tools in 5 cognitive groups (baseline: v3.0.0). The design is intellectually coherent — each group maps to a role the AI plays when interacting with memory. v3.3.0 expanded the surface to 29 tools (the 10 additions are Tunnel CRUD, Drawer read/write CRUD, and operational tools), but the five-role skeleton is unchanged — see Chapter 19's version-evolution note.
 
 ### What mempal Does
 
@@ -182,11 +182,11 @@ mempal exposes 5 tools: `mempal_status`, `mempal_search`, `mempal_ingest`, `memp
 
 ### Why the Reduction
 
-The reduction is not a judgment that 19 tools are wrong. It reflects a different stage of implementation maturity and a design choice about self-documentation.
+The reduction is not a judgment that MemPalace's tool surface is wrong. It reflects a different stage of implementation maturity and a design choice about self-documentation.
 
-Eight of MemPalace's 19 tools belong to the Knowledge Graph (5) and Navigation (3) groups. These depend on a fully populated knowledge graph and a working graph traversal engine — subsystems that Appendix D flagged as more narrated than exercised. Including tools for subsystems that are not yet reliable misleads agents into calling them and getting poor results.
+Eight of v3.0.0's 19 tools belong to the Knowledge Graph (5) and Navigation (3) groups. These depend on a fully populated knowledge graph and a working graph traversal engine — subsystems that Appendix D flagged as more narrated than exercised. Including tools for subsystems that are not yet reliable misleads agents into calling them and getting poor results. v3.3.0's 29 tools merely added CRUD fill-ins (drawer get/list/update, explicit tunnel CRUD) and an operational surface (`reconnect`, `hook_settings`, `memories_filed_away`) on top — the 8 weak-subsystem dependencies were not resolved.
 
-The 5-tool surface also enables richer per-tool documentation. Each tool in mempal carries detailed field-level documentation — the `wing` field on `SearchRequest` (`crates/mempal-mcp/src/tools.rs:11-16`) explains exactly when to omit it and warns that guessing silently returns zero results. With 19 tools, this level of documentation per field would overwhelm the tool-list response. With 5 tools, each one can be thoroughly self-documenting.
+The 5-tool surface also enables richer per-tool documentation. Each tool in mempal carries detailed field-level documentation — the `wing` field on `SearchRequest` (`crates/mempal-mcp/src/tools.rs:11-16`) explains exactly when to omit it and warns that guessing silently returns zero results. With 29 tools, this level of documentation per field would overwhelm the tool-list response. With 5 tools, each one can be thoroughly self-documenting.
 
 The protocol-level design that makes 5 tools sufficient — the MEMORY_PROTOCOL embedded in MCP server instructions — is the subject of Chapter 28.
 

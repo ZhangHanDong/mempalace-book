@@ -23,7 +23,7 @@ graph LR
     subgraph "Book Analysis (Chapters 1-25)"
         A1["Ch 9 + App C:<br/>AAAK has no<br/>formal grammar"]
         A2["Ch 5 + Ch 7 + App D:<br/>3 of 5 tiers<br/>underutilized"]
-        A3["Ch 19 + App D:<br/>19 tools,<br/>8 depend on<br/>unfinished subsystems"]
+        A3["Ch 19 + App D:<br/>19 tools (v3.0.0),<br/>8 depend on<br/>unfinished subsystems"]
     end
 
     subgraph "mempal Response"
@@ -59,11 +59,13 @@ graph LR
 
 ### 19 个工具，5 种认知角色
 
-第19章分析了 MCP 服务器的 19 个工具，按 5 种认知角色组织：Read（7个）、Write（2个）、Knowledge Graph（5个）、Navigation（3个）和 Diary（2个）。基于角色的组织方式在智识层面是自洽的。但对于一个需要做工具选择决策的 AI agent 来说，19 个选项形成了一个巨大的决策空间。
+第19章分析了 v3.0.0 时 MCP 服务器的 19 个工具，按 5 种认知角色组织：Read（7个）、Write（2个）、Knowledge Graph（5个）、Navigation（3个）和 Diary（2个）。基于角色的组织方式在智识层面是自洽的。但对于一个需要做工具选择决策的 AI agent 来说，19 个选项已形成一个巨大的决策空间。[^v33-tools]
 
 每次工具调用都消耗 token——不仅是调用本身，还有 LLM 在 19 个工具中评估哪个最匹配当前意图的开销。Knowledge Graph 组（5个工具）和 Navigation 组（3个工具）依赖的子系统，正是附录 D 标记为"叙述多于实际运行"的部分。Diary 组假设了一种专家 agent 架构，而这并非当前默认运行时的一部分。
 
 问题变成了：一个更小的工具面——聚焦于实际可用于生产的功能——能否更好地服务 agent？不是因为更少的工具天然就更好，而是因为更小的集合中每个工具可以携带更丰富的自描述文档，且 agent 在工具选择上消耗的 token 更少。mempal 的答案是 5 个工具——`mempal_status`、`mempal_search`、`mempal_ingest`、`mempal_delete` 和 `mempal_taxonomy`——注册在 `crates/mempal-mcp/src/server.rs` 中。每个工具的输入 schema 都携带文档注释，教 agent 如何正确使用它（详见第28章）。
+
+[^v33-tools]: 本章引用的 19 个工具是 v3.0.0 的快照。截至 v3.3.0，`TOOLS` 字典（`mcp_server.py:1111`）已扩展到 29 个工具——新增的是 Tunnel CRUD（4 个）、Drawer 读写 CRUD（3 个）、运维工具（3 个）。详见第19章章末的版本演化说明。对 mempal 的 29→5 对比来说，精简幅度更显著——基础论点不受影响。
 
 ---
 
@@ -123,7 +125,7 @@ MemPalace 是一个 Python 库。它需要 `pip install`、Python 运行时和 C
 
 ### Rust 解决不了什么
 
-语言选择不解决设计问题。Rust 不会告诉我们把五层简化为两层，或给 AAAK 添加形式化文法，或把 19 个 MCP 工具缩减为 5 个。这些决策来自本书的分析。Rust 提供的是一个载体，让我们能以一种良好服务 coding agent 的产品形态来实施这些决策。
+语言选择不解决设计问题。Rust 不会告诉我们把五层简化为两层，或给 AAAK 添加形式化文法，或把 MCP 工具缩减为 5 个（v3.0.0 是 19 个，v3.3.0 是 29 个）。这些决策来自本书的分析。Rust 提供的是一个载体，让我们能以一种良好服务 coding agent 的产品形态来实施这些决策。
 
 Rust 也没有消除所有挑战。嵌入模型（MiniLM）以英语为中心，这降低了非英语查询的搜索质量——我们在自用过程中发现了这个问题，并通过协议层的变通方案而非语言层的方案来解决（详见第28章）。类型系统能捕获接口不匹配，但无法验证搜索结果是否语义相关。静态分析能防止内存损坏，但防不了过宽的删除查询导致的数据丢失——这是我们在开发过程中吃到的教训（详见第29章）。
 

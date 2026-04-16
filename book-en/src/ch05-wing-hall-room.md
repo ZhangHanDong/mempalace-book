@@ -364,3 +364,37 @@ MemPalace did not try to "improve" the Method of Loci --- it tried to translate 
 When an engineer hears "database partition," they pursue uniform data distribution. When they hear "a wing of a building," they accept that different wings have different sizes --- because in a real building, the kitchen and the bedroom do not need to be the same size. This subtle difference in cognitive framing influences dozens of subsequent design choices, ultimately leading to a system significantly different from one driven by pure engineering considerations.
 
 The next chapter will discuss the most distinctive emergent property of the five-tier structure --- Tunnels: the cross-domain connections that automatically form when the same Room appears in multiple Wings.
+
+---
+
+## Version Evolution: v3.0.0 → v3.3.0
+
+The chapter's judgment that Hall is "an explanatory mid-layer, not an independent query parameter" is partially overturned in v3.3.0.
+
+### Hall moves from "narrative" to "implementation"
+
+v3.3.0 defines `DEFAULT_HALL_KEYWORDS` in `config.py:74-112`, binding 7 Halls to keyword lists:
+
+```python
+DEFAULT_HALL_KEYWORDS = {
+    "emotions": ["scared", "afraid", "worried", "happy", "sad", "love", ...],
+    "consciousness": ["consciousness", "conscious", "aware", "real", ...],
+    "memory": ["memory", "remember", "forget", "recall", ...],
+    "technical": ["code", "python", "script", "bug", "error", ...],
+    "identity": ["identity", "name", "who am i", "persona", "self"],
+    "family": ["family", "kids", "children", "daughter", ...],
+    "creative": ["game", "gameplay", "player", "app", "design", ...],
+}
+```
+
+Drawers are routed to their Hall at ingest time via keyword matching (PR `#835`). Note that `DEFAULT_HALL_KEYWORDS` shares the same 7 names as `DEFAULT_TOPIC_WINGS` (`config.py:64-72`) mentioned in this chapter, but the two play different roles: `DEFAULT_TOPIC_WINGS` is the list of optional "topic wings"; `DEFAULT_HALL_KEYWORDS` is the keyword-to-Hall routing table used inside a wing. v3.3.0's README audit (PR `#835`, 42 regression tests) confirms Hall detection as a verifiable capability, not just narrative.
+
+### Chapter judgment revisions
+
+- **v3.0.0**: "Hall exists as a classification concept but is not the default routing target."
+- **v3.3.0**: Hall is the default routing target — every drawer gets assigned a Hall at ingest. But users still cannot filter by Hall through the MCP `search` tool's parameters directly (that exposure is still being designed).
+- Users can override defaults via `hall_keywords` in `~/.mempalace/config.json` to adapt Hall definitions to their own language patterns.
+
+### Impact on Chapter 7's "+Hall: 84.8%" benchmark
+
+The "+Hall: 84.8%" lift cited at the end of this chapter is a v3.0.0 historical benchmark. v3.3.0's Hall detection is what actually makes this number reproducible — in v3.0.0, Hall was more a metadata tag than a routing driver, and the +12% gain is hard to replicate on v3.0.0's default pipeline. The v3.3.0 benchmark should be re-run independently for confirmation.

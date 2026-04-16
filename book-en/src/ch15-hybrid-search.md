@@ -263,3 +263,28 @@ The final v4 breakthrough from 99.4% to 100% relied on three extremely targeted 
 This is not pejorative. Quite the opposite -- it demonstrates that MemPalace's foundational architecture -- raw text + structured storage + embedding retrieval -- is strong enough that only a tiny number of highly specific cases require extra handling. 96.6% is the power of architecture. The journey from 3.4% to 0% is the power of precision engineering. Both are indispensable, but their focus differs: the former is transferable; the latter requires adaptation.
 
 If you are designing your own memory system, the design principles behind 96.6% (store raw text, organize structurally, retrieve via embeddings) are directly borrowable. The targeted optimizations from 96.6% to 100% need to be customized based on your own failure cases. This is this chapter's most essential takeaway: **do not start from optimization. Start from the baseline, then let the failure cases tell you what to optimize.**
+
+---
+
+## Version Evolution: v3.0.0 → v3.3.0
+
+The chapter's core analysis (hybrid-path design, the 96.6%-to-100% engineering story, two independent paths converging) still holds in v3.3.0. But two low-level fixes directly affect whether the chapter's numbers are reproducible — if you plan to re-run the benchmark, you must run it on v3.3.0.
+
+### Issue #807: ChromaDB distance metric fix
+
+v3.0.0 did not explicitly declare a distance metric when creating collections, so ChromaDB silently fell back to **L2 (Euclidean)** — whereas the entire book's analysis (this chapter included) assumes **cosine similarity**. The two behave similarly on length-normalized embeddings but can produce radically different nearest-neighbor rankings on unnormalized vectors. This means v3.0.0's 96.6% and v4's 100% were both measured under L2 — the "0.9 cosine dedup threshold" in `add_drawer` and `search`'s cosine distance filter mentioned in this chapter may have **actually been running L2** in v3.0.0.
+
+`#807` added `{"hnsw:space": "cosine"}` metadata at every collection creation site. Only under v3.3.0 does cosine truly land. **If you want to reproduce the 96.6% → 100% numbers, re-run under v3.3.0.**
+
+### BM25 + Closet boost
+
+v3.3.0 introduced the Closet layer as a compact index above drawers (PR `#788`). BM25 runs against closets (`#795`, `#829`), and matches **boost** the underlying drawers rather than gating them — meaning BM25 won't drop drawers that vector retrieval finds but BM25 misses. This is closer to production RAG practice (typical pipelines run BM25 recall + vector rerank, or fusion of both).
+
+This chapter's hybrid path is **problem classification + path selection** hybrid; v3.3.0's BM25 + vector is **recall-layer** hybrid. The two "hybrid" approaches solve different problems and can stack — the benefit of stacking hasn't been measured in this chapter's benchmark and is worth a follow-up experiment.
+
+### Diff snapshot
+
+- v3.0.0: vector retrieval + optional hybrid path + L2 default distance (cosine was the design intent)
+- v3.3.0: vector retrieval + BM25 closet boost + enforced cosine + optional hybrid path
+
+None of this chapter's percentage numbers have been re-run on v3.3.0. Readers citing these numbers precisely should understand them as measured against v3.0.0.

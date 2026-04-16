@@ -167,3 +167,42 @@ return {
 放在 CLAUDE.md 里？那是配置膨胀——每多一个代理，配置文件就多一段。放在独立数据库里？那是基础设施膨胀——每多一个代理，就多一个存储实例要管理。放在云服务里？那是成本膨胀——每多一个代理，月费就多一份。
 
 放在宫殿的一个 wing 里？那是一个标签。宫殿已经有搜索、有导航、有知识图谱、有压缩。代理只是这些已有能力的一个新消费者。它不增加基础设施，不增加配置，不增加月费。它只增加记忆——而记忆正是宫殿存在的意义。
+
+---
+
+## 版本演化说明：v3.0.0 → v3.3.0
+
+本章在 v3.0.0 时描述的是"代理系统的设计路径"——`diary_write` / `diary_read` 存在，但专家代理作为 runtime 角色尚未实装。v3.3.0 有三个新模块直接补齐了这块，但采取了与本章预期略有差别的路线。
+
+### fact_checker.py —— 第一个"本地专家代理"
+
+v3.3.0 新增 `mempalace/fact_checker.py`（335 行）。它不是本章设想的"用 wing 记录经验"的代理——而是一个**无状态的纯离线校验器**：给定一段文本，对照 `entity_registry.json` 和 KG SQLite 做三类检查（`similar_name` 形近人名、`relationship_mismatch` 关系矛盾、`stale_fact` 过期事实），返回一个 `issues` 列表。注意它**没有接入任何 ingest 路径**——既不是 `miner.py` 的前置钩子，也不是 `mcp_server.py` 写入时的自动校验。目前只能由用户通过 CLI（`python -m mempalace.fact_checker "..."`）或直接 `from mempalace.fact_checker import check_text` 手动调用。
+
+因此它是"专家"的另一种形态：专业技能内嵌在代码和数据中，而非在 diary 里累积；但形态还停留在"可选工具"而非"管道组件"。要变成名副其实的"入库前质量门"，还需要在 ingest 路径里显式接上这个函数——v3.3.0 还没走到这一步。
+
+这与本章"代理的意义栈"第二层（用 AAAK diary 累积认知模式）是**互补而非替代**的。fact_checker 给你一个可手动调用的事实一致性校验点，diary 管入库后的经验沉淀——两者在未来串起来可以构成完整的 agent pipeline，目前还是各自独立。
+
+### closet_llm.py —— 可选的 LLM 专家
+
+v3.3.0 新增 `mempalace/closet_llm.py`（351 行，PR `#793`）。它允许在 closet 层调用外部 LLM 重新生成压缩摘要——但关键约束是"bring-your-own endpoint, no mandatory API key"。
+
+这是本章 "local-first 不妥协" 精神的一次压力测试：第一次允许 LLM 进入 pipeline，同时坚持**不强制任何 API key**。默认路径仍是 100% 本地（关键词、BM25、嵌入），LLM 只在用户显式配置 endpoint 时接入——包括用户自部署的本地推理服务（ollama、llama.cpp、vLLM）。
+
+这种"可选外部能力 + 本地默认"的设计在 v3.0.0 没有先例。本章的"代理架构"从"一个 wing 就够了"扩展到"一个 wing + 一个可选的外部大脑"——但默认形态不变。
+
+### diary_ingest.py —— 按天聚合的 diary 摄入
+
+v3.3.0 新增 `mempalace/diary_ingest.py`（209 行）。它的设计形态和本章预期稍有出入——**room 是硬编码的 `"daily"`**（`diary_ingest.py:141,171`），日期不在 room 名里而是放在 drawer 的 metadata `date` 字段和 drawer_id 的 hash 里。也就是说 v3.3.0 的 diary 结构是 `(wing, room="daily")` 这一个房间里每天沉淀一条按日期标签的 drawer，而非每一天一个独立 room。
+
+MCP 的 `diary_write` 工具（`mcp_server.py:902-903`）走的是另一条代码路径：wing 是 `f"wing_{agent_name.lower().replace(' ', '_')}"`、room 硬编码为 `"diary"`——也就是每个 agent 有一个自己的 `diary` room。和 `diary_ingest.py` 的 `"daily"` 不是同一个 room 名，两条路径尚未统一。本章最后一节"reviewer 代理读取 10 条最近压缩日记"在 v3.3.0 的落地是"在 `(wing_reviewer, diary)` 房间里按 `filed_at` 排序取最近几条"，而不是"取最近几天的 room"。
+
+### 对本章核心论点的影响
+
+不变：
+- 代理 = wing（一个元数据标签）
+- 成本函数斜率为零（新增代理不增加基础设施）
+- 三层意义栈（存储 / 认知 / 生态）成立
+
+修订：
+- v3.0.0 时"代理仅通过 `diary_write` 积累"——v3.3.0 多了两条可选路径：`fact_checker` 的离线事实校验（目前仍是手动调用工具，不是自动管道）、`closet_llm` 的可选 LLM 大脑。
+- 本章说"没有 API key"是真的——v3.3.0 仍然成立，只是 `closet_llm` 让你可以**选择**接入一个（内容自己掌控的）LLM endpoint。

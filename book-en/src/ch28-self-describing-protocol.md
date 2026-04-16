@@ -8,7 +8,7 @@
 
 When an AI agent connects to an MCP server, it receives a list of tools. Each tool has a name, a description, and an input schema. The agent must decide — from this information alone — when to call which tool, what parameters to pass, and how to interpret results.
 
-Chapter 19 analyzed MemPalace's 19-tool MCP surface. The tool descriptions tell the agent *what* each tool does. But they do not tell the agent *when* to use memory versus grepping files, *how* to discover valid wing names before filtering, or *why* citations matter. Those behavioral patterns were documented in README files and project guides — places that an MCP-connected agent never sees.
+Chapter 19 analyzed MemPalace's 19-tool MCP surface in v3.0.0 (expanded to 29 in v3.3.0 — see that chapter's version-evolution note). The tool descriptions tell the agent *what* each tool does. But they do not tell the agent *when* to use memory versus grepping files, *how* to discover valid wing names before filtering, or *why* citations matter. Those behavioral patterns were documented in README files and project guides — places that an MCP-connected agent never sees.
 
 mempal's answer is not better tool descriptions. It is a behavioral protocol embedded in the tool interface itself.
 
@@ -155,7 +155,7 @@ A test in `mcp_test.rs` guards this: `test_mempal_search_schema_warns_about_wing
 
 ## 19 Tools to 7: Less Is More (With Context)
 
-Chapter 19 documented MemPalace's 19 tools organized into 5 cognitive roles. mempal has 7 tools. This section explains why the reduction works — and what it depends on.
+Chapter 19 documented MemPalace's 19 tools organized into 5 cognitive roles (baseline: v3.0.0; expanded to 29 in v3.3.0 — see that chapter's version-evolution note). mempal has 7 tools. This section explains why the reduction works — and what it depends on.
 
 ### What 7 Tools Cover
 

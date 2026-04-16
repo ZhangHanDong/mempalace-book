@@ -23,7 +23,7 @@ graph LR
     subgraph "Book Analysis (Chapters 1-25)"
         A1["Ch 9 + App C:<br/>AAAK has no<br/>formal grammar"]
         A2["Ch 5 + Ch 7 + App D:<br/>3 of 5 tiers<br/>underutilized"]
-        A3["Ch 19 + App D:<br/>19 tools,<br/>8 depend on<br/>unfinished subsystems"]
+        A3["Ch 19 + App D:<br/>19 tools (v3.0.0),<br/>8 depend on<br/>unfinished subsystems"]
     end
 
     subgraph "mempal Response"
@@ -59,11 +59,13 @@ This means three of the five tiers in the spatial hierarchy are, in practice, ei
 
 ### 19 Tools, 5 Cognitive Roles
 
-Chapter 19 analyzed the MCP server's 19 tools organized into 5 cognitive roles: Read (7), Write (2), Knowledge Graph (5), Navigation (3), and Diary (2). The role-based organization is intellectually coherent. But for an AI agent making tool-selection decisions, 19 choices create a large decision space.
+Chapter 19 analyzed MCP server's v3.0.0 snapshot of 19 tools organized into 5 cognitive roles: Read (7), Write (2), Knowledge Graph (5), Navigation (3), and Diary (2). The role-based organization is intellectually coherent. But for an AI agent making tool-selection decisions, 19 choices already create a large decision space.[^v33-tools]
 
 Each tool call costs tokens — not just for the call itself, but for the LLM to evaluate which of 19 tools best matches its current intent. The Knowledge Graph group (5 tools) and Navigation group (3 tools) depend on subsystems that Appendix D flagged as more narrated than exercised. The Diary group assumes a specialist agent architecture that is not yet part of the default runtime.
 
 The question became: could a smaller tool surface — focused on what is actually production-ready — serve agents better? Not because fewer tools are inherently better, but because each tool in a smaller set can carry richer self-documentation, and agents spend fewer tokens on tool selection. mempal's answer is 5 tools — `mempal_status`, `mempal_search`, `mempal_ingest`, `mempal_delete`, and `mempal_taxonomy` — registered in `crates/mempal-mcp/src/server.rs`. Each tool's input schema carries doc comments that teach agents how to use it correctly (see Chapter 28).
+
+[^v33-tools]: The 19 tools cited in this chapter are the v3.0.0 snapshot. As of v3.3.0, the `TOOLS` dict (`mcp_server.py:1111`) has grown to 29 — the additions are Tunnel CRUD (4), Drawer read/write CRUD (3), and operational tools (3). See the version-evolution note at the end of Chapter 19. For the mempal 29→5 comparison, the trimming becomes more dramatic — the core argument is unaffected.
 
 ---
 
@@ -123,7 +125,7 @@ Given the single-binary requirement, several languages could work: Go, Zig, C++,
 
 ### What Rust Does Not Solve
 
-Language choice does not solve design problems. Rust did not tell us to simplify five tiers to two, or to add a formal grammar to AAAK, or to reduce 19 MCP tools to 5. Those decisions came from the book's analysis. Rust provided a vehicle for implementing those decisions in a product form that serves coding agents well.
+Language choice does not solve design problems. Rust did not tell us to simplify five tiers to two, or to add a formal grammar to AAAK, or to reduce the MCP tool surface to 5 (v3.0.0 had 19 tools; v3.3.0 has 29). Those decisions came from the book's analysis. Rust provided a vehicle for implementing those decisions in a product form that serves coding agents well.
 
 Rust also did not eliminate all challenges. The embedding model (MiniLM) is English-centric, which degrades search quality for non-English queries — a problem we discovered during dogfooding and addressed with a protocol-level workaround rather than a language-level solution (see Chapter 28). The type system catches interface mismatches but cannot verify that a search result is semantically relevant. Static analysis prevents memory corruption but not data loss from overly broad deletion queries — a lesson we learned the hard way during development (see Chapter 29).
 

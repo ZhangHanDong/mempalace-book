@@ -167,3 +167,42 @@ These three layers together answer a bigger question: where should AI agent memo
 In CLAUDE.md? That's configuration bloat -- every additional agent means another section in the configuration file. In separate databases? That's infrastructure bloat -- every additional agent means another storage instance to manage. In cloud services? That's cost bloat -- every additional agent means another line item on the monthly bill.
 
 In one wing of the palace? That's a tag. The palace already has search, navigation, knowledge graph, and compression. The agent is simply a new consumer of these existing capabilities. It doesn't add infrastructure, doesn't add configuration, doesn't add monthly fees. It only adds memory -- and memory is the very reason the palace exists.
+
+---
+
+## Version Evolution: v3.0.0 → v3.3.0
+
+In v3.0.0 this chapter described "the design path for an agent system" — `diary_write` / `diary_read` existed, but specialist agents as runtime roles weren't yet implemented. v3.3.0 adds three modules that directly fill in this space, but along a slightly different trajectory from what the chapter anticipated.
+
+### fact_checker.py — the first "local specialist agent"
+
+v3.3.0 adds `mempalace/fact_checker.py` (335 lines). It is not the "agent that accumulates experience in a wing" the chapter envisioned — instead it is a **stateless, purely-offline validator**: given a text, it checks against `entity_registry.json` and the KG SQLite for three issue classes (`similar_name` near-duplicate names, `relationship_mismatch` role conflicts, `stale_fact` expired facts), and returns an `issues` list. Note that it is **not wired into any ingest path** — not as a pre-hook in `miner.py`, not as an automatic check in `mcp_server.py`'s write paths. Today it can only be invoked manually via CLI (`python -m mempalace.fact_checker "..."`) or by direct import (`from mempalace.fact_checker import check_text`).
+
+It is thus another shape of "specialist": expertise embedded in code and data rather than accumulated in a diary — but the current shape is "an optional tool," not "a pipeline component." To become an actual "pre-ingest quality gate," it would need to be explicitly wired into an ingest path. v3.3.0 hasn't taken that step.
+
+This is **complementary, not replacement**, to the chapter's second meaning-stack layer (accumulate cognitive patterns in AAAK diary). fact_checker gives you a manually-invokable fact-consistency checkpoint; diary handles post-ingest experience sedimentation. Strung together in the future they would form a complete agent pipeline — today they are still independent.
+
+### closet_llm.py — the optional LLM specialist
+
+v3.3.0 adds `mempalace/closet_llm.py` (351 lines, PR `#793`). It allows calling an external LLM at the closet layer to regenerate compressed summaries — with a critical constraint: "bring-your-own endpoint, no mandatory API key."
+
+This is a stress test of the chapter's "local-first, no compromise" ethos: the first time LLMs enter the pipeline, while insisting **no API key is mandatory**. The default path remains 100% local (keywords, BM25, embeddings); LLMs are only invoked when the user explicitly configures an endpoint — including self-hosted local inference servers (ollama, llama.cpp, vLLM).
+
+This "optional external capability + local default" design had no precedent in v3.0.0. The chapter's "agent architecture" extends from "a wing is enough" to "a wing + an optional external brain" — but the default form is unchanged.
+
+### diary_ingest.py — day-aggregated diary ingest
+
+v3.3.0 adds `mempalace/diary_ingest.py` (209 lines). Its actual shape differs slightly from what the chapter anticipated — **the room is hardcoded to `"daily"`** (`diary_ingest.py:141,171`); the date is not in the room name but in the drawer's metadata `date` field and in the drawer_id hash. That is, the v3.3.0 diary structure is: inside a single `(wing, room="daily")` room, each day precipitates one date-tagged drawer — not one room per day.
+
+The MCP `diary_write` tool (`mcp_server.py:902-903`) uses a different code path: the wing is `f"wing_{agent_name.lower().replace(' ', '_')}"` and the room is hardcoded to `"diary"` — i.e., each agent gets its own `diary` room. This is not the same room name as `diary_ingest.py`'s `"daily"`; the two paths have not been unified. The chapter's closing "reviewer agent reading 10 recent compressed diaries" maps in v3.3.0 to "sort by `filed_at` inside `(wing_reviewer, diary)` and take the most recent few," not "take drawers from the most recent few day-rooms."
+
+### Impact on the chapter's core argument
+
+Unchanged:
+- agent = wing (one metadata tag)
+- Cost-function slope is zero (new agents don't add infrastructure)
+- Three-layer meaning stack (storage / cognitive / ecosystem) holds
+
+Revised:
+- v3.0.0: "agents only accumulate via `diary_write`." v3.3.0: two more optional paths — `fact_checker`'s offline fact-consistency check (still a manually-invokable tool, not an automatic pipeline) and `closet_llm`'s optional LLM brain.
+- "No API key" — still true in v3.3.0; `closet_llm` simply lets you **choose** to plug in an LLM endpoint whose contents you control.
