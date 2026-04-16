@@ -61,3 +61,9 @@ Scenario: 设计权衡讨论
   When 检查设计决策分析
   Then 讨论了 Hall 为什么是固定 5 种而不是用户自定义
   And 讨论了 Room 用 slug 而不是自由文本的原因
+
+## 版本演化附注（v3.3.0）
+
+- 章末已追加"版本演化说明"小节，记录 Hall 检测从"叙述层"走向"实现层"（PR `#835`，`config.py:74-112` `DEFAULT_HALL_KEYWORDS`）。
+- 章内正文保持 v3.0.0 基线，只 clarify 了 `DEFAULT_HALL_KEYWORDS` / `DEFAULT_TOPIC_WINGS` 两个同名不同角色的对象。
+- 未动 Chapter 7 的"+Hall: 84.8%"基准数字——在版本演化说明中标注 v3.3.0 下需重跑确认。

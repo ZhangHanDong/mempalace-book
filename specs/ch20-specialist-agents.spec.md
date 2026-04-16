@@ -45,3 +45,13 @@ Scenario: 日记格式示例
   Then 包含具体的日记写入和读取示例
   And 展示 AAAK 格式如何压缩 agent 的专业知识
   And 明确 diary_write 当前不会强制校验 AAAK
+
+## 版本演化附注（v3.3.0）
+
+章末已追加"版本演化说明"小节，覆盖三个新模块，并对章内预期与实际实现的差异做了诚实标注：
+
+- **fact_checker.py**（335 行）：纯离线事实校验器，返回 `issues` 列表，**未接入任何 ingest 路径**——目前仅能通过 CLI 或直接 import 手动调用。本章原预期的"入库前质量门"在 v3.3.0 尚未实现为自动管道。
+- **closet_llm.py**（351 行，PR `#793`）：可选 LLM closet 重生成，bring-your-own endpoint，默认不调用。不破坏章内"no mandatory API key"论点。
+- **diary_ingest.py**（209 行）：room 硬编码 `"daily"`（`diary_ingest.py:141,171`），不是"按天建 room"。MCP `diary_write` 工具（`mcp_server.py:902-903`）另走一条路径，room 硬编码 `"diary"`——两条路径 room 名尚未统一。
+
+本章"代理 = wing + diary、成本函数斜率为零"的核心论点不变。

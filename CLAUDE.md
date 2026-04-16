@@ -3,7 +3,8 @@
 ## What This Is
 
 技术+产品分析书籍《MemPalace：AI 记忆的第一性原理》的中英双语 mdbook 项目。
-基于 [MemPalace](https://github.com/milla-jovovich/mempalace) v3.0.0 源码分析。
+基线：[MemPalace](https://github.com/MemPalace/mempalace) **v3.0.0 源码快照**。
+每章章末附 **版本演化说明**，记录 v3.0.0 → v3.3.0（当前 release）的增量及其对章节原分析的影响。
 
 ## Project Structure
 

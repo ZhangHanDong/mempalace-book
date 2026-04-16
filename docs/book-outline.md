@@ -192,13 +192,16 @@
 ### 附录 A：E2E Trace — 从 `mempalace init` 到第一次搜索
 ### 附录 B：E2E Trace — MCP 工具调用的完整生命周期
 ### 附录 C：AAAK 语法完整参考
-### 附录 D：Benchmark 原始数据与复现指南
+### 附录 D：真实性与可信度评估
+### 附录 E：存储后端抽象层（v3.3.0 增量）
 
 ---
 
 ## 元信息
 
-- 总章数：25 章 + 前言 + 第 0 章 + 4 个附录
+- 总章数：25 章（Part 1-9） + Part 10（mempal，5 章） + 前言 + 第 0 章 + 5 个附录
 - 每章模式：问题 → 设计决策 → 权衡分析 → 源码实现 → 数据验证
-- 源码基线：MemPalace v3.0.0
-- 主要源码目录：/Users/zhangalex/Work/Projects/AI/mempalace/mempalace/
+- 源码基线：MemPalace **v3.0.0 源码快照**
+- 版本演化机制：涉及子系统有重大变化的章节在章末追加"版本演化说明"小节，记录 v3.0.0 → v3.3.0（当前 release）的增量及其对章节原分析的影响。目前已加此节的章节：ch05 / ch15 / ch19 / ch20；ch26 / ch27 / ch28 含内联版本注脚。
+- 主要源码目录：`/Users/zhangalex/Work/Projects/AI/mempalace/mempalace/`
+- Part 10（mempal）源码目录：`/Users/zhangalex/Work/Projects/AI/mempal/crates/`
