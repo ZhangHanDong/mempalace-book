@@ -69,3 +69,4 @@
 - [Appendix B: E2E Trace — MCP Tool Call Lifecycle](appendix-e2e-mcp.md)
 - [Appendix C: AAAK Dialect Complete Reference](appendix-aaak-spec.md)
 - [Appendix D: Authenticity and Credibility Assessment](appendix-credibility-assessment.md)
+- [Appendix E: Storage Backend Abstraction (v3.3.0 Increment)](appendix-storage-backend.md)

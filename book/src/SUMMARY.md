@@ -69,3 +69,4 @@
 - [附录 B：E2E Trace — MCP 工具调用的完整生命周期](appendix-e2e-mcp.md)
 - [附录 C：AAAK 方言完整参考](appendix-aaak-spec.md)
 - [附录 D：真实性与可信度评估](appendix-credibility-assessment.md)
+- [附录 E：存储后端抽象层（v3.3.0 增量）](appendix-storage-backend.md)
